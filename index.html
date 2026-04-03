@@ -659,6 +659,55 @@
             animation: softPulse 1.8s infinite ease;
         }
 
+        /* ===== STYLISH TOOLTIP: appears above/next to button with elegant fade ===== */
+        .play-tooltip {
+            position: fixed;
+            bottom: 28px;
+            left: 92px;
+            z-index: 9998;
+            background: rgba(0, 0, 0, 0.096);
+            backdrop-filter: blur(12px);
+            color: var(--black);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            padding: 8px 18px;
+            border-radius: 40px;
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid rgba(219, 183, 0, 0.5);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.4s ease;
+            font-weight: 400;
+            text-transform: uppercase;
+        }
+        
+        .play-tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .play-tooltip.hide {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.35s ease, transform 0.3s ease;
+        }
+
+    @media (max-width: 768px) {
+        .play-tooltip {
+            bottom: 28px;
+            left: 92px;
+            font-size: 0.65rem;
+            padding: 6px 14px;
+        }
+        .play-tooltip::after {
+            bottom: 12px;
+            left: -6px;
+        }
+    }
+
         /* ===== RESPONSIVE DESIGN - FULLY CONSOLIDATED ===== */
         @media (max-width: 1024px) {
             .services-grid { grid-template-columns: repeat(2, 1fr); }
@@ -669,76 +718,40 @@
         }
         
         @media (max-width: 768px) {
-            /* Navigation */
             .nav { padding: 20px 24px; }
             .nav-links { display: none; }
             .hamburger { display: flex; }
-            
-            /* Hero */
             .hero { padding: 0 24px 80px; }
             .hero-bottom { flex-direction: column; align-items: flex-start; }
-            
-            /* Sections */
             .services, .contact { padding: 80px 24px; }
             .portfolio { padding: 80px 24px; }
-            
-            /* Grids */
             .services-grid { grid-template-columns: 1fr; }
             .portfolio-grid { grid-template-columns: 1fr; gap: 28px; margin-top: 48px; }
-            .stats-strip { 
-                grid-template-columns: repeat(2, 1fr); 
-                padding: 40px 20px; 
-                gap: 16px; 
-            }
+            .stats-strip { grid-template-columns: repeat(2, 1fr); padding: 40px 20px; gap: 16px; }
             .contact-layout { grid-template-columns: 1fr; gap: 48px; }
-            
-            /* Cards */
             .service-card { padding: 36px 24px; }
             .service-name { font-size: 1.4rem; }
             .stat-item { padding: 32px 20px; }
             .portfolio-overlay { padding: 24px; }
             .portfolio-name { font-size: 1.7rem; }
-            .portfolio-category { font-size: 0.65rem; }
-            .portfolio-link { padding: 7px 20px; font-size: 0.75rem; }
-            
-            /* Contact Form */
             .contact-form { padding: 28px 20px; }
             .form-row { grid-template-columns: 1fr; margin-bottom: 0; gap: 16px; }
-            
-            /* Footer */
             .footer { flex-direction: column; text-align: center; }
-            
-            /* Section Headers */
             .section-header { flex-direction: column; margin-bottom: 48px; }
-            
-            /* Audio Button */
-            .audio-control {
-                bottom: 20px;
-                left: 20px;
-                width: 48px;
-                height: 48px;
-            }
+            .audio-control { bottom: 20px; left: 20px; width: 48px; height: 48px; }
             .audio-control i { font-size: 1.4rem; }
         }
         
         @media (max-width: 480px) {
-            .stats-strip { 
-                grid-template-columns: 1fr; 
-                gap: 12px; 
-                padding: 30px 16px;
-            }
+            .stats-strip { grid-template-columns: 1fr; gap: 12px; padding: 30px 16px; }
             .stat-item { padding: 24px 16px; }
             .stat-number { font-size: 2rem; }
             .portfolio-name { font-size: 1.4rem; }
             .portfolio-overlay { padding: 20px; }
             .portfolio-link { padding: 6px 16px; }
             .portfolio-grid { gap: 20px; }
-            .audio-control {
-                bottom: 16px;
-                left: 16px;
-                width: 44px;
-                height: 44px;
-            }
+            .audio-control { bottom: 16px; left: 16px; width: 44px; height: 44px; }
+            .play-tooltip { bottom: 72px; left: 16px; font-size: 0.6rem; padding: 5px 12px; }
         }
     </style>
 </head>
@@ -946,6 +959,9 @@
         <i class="fas fa-play" id="audioIcon"></i>
     </button>
     <audio id="bgAudio" loop preload="auto" src="./[FREE] TYLER, THE CREATOR TYPE BEAT NEED YOU.mp3"></audio>
+    
+    <!-- STYLISH TOOLTIP that appears near the play button -->
+    <div id="playTooltip" class="play-tooltip">PLAY OR PAUSE</div>
 
     <script>
     (function(){
@@ -1022,19 +1038,15 @@
         if(contactForm){ 
             contactForm.addEventListener('submit',async(e)=>{ 
                 e.preventDefault(); 
-                
                 const originalButtonText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span>Sending...</span>';
-                
                 if(msgDiv){ 
                     msgDiv.style.display='none'; 
                     msgDiv.className='form-message'; 
                     msgDiv.textContent=''; 
                 } 
-                
                 const fd=new FormData(contactForm);
-                
                 try{ 
                     const resp=await fetch('https://formsubmit.co/ajax/2dbe592043c5fbb7c149c062f5e296dc',{
                         method:'POST',
@@ -1070,10 +1082,11 @@
             }); 
         }
 
-        // ========== CIRCLE PLAY/PAUSE BUTTON + AUTOPLAY AUDIO ==========
+        // ========== CIRCLE PLAY/PAUSE BUTTON + STYLISH DISAPPEARING TOOLTIP ==========
         const audio = document.getElementById('bgAudio');
         const toggleBtn = document.getElementById('audioToggleBtn');
         const audioIcon = document.getElementById('audioIcon');
+        const tooltip = document.getElementById('playTooltip');
 
         if(audio) {
             audio.volume = 0.45;
@@ -1082,7 +1095,6 @@
 
         function updateButtonState() {
             if(!audio || !audioIcon || !toggleBtn) return;
-            
             if(!audio.paused) {
                 audioIcon.classList.remove('fa-play');
                 audioIcon.classList.add('fa-pause');
@@ -1094,7 +1106,47 @@
             }
         }
 
+        // STYLISH TOOLTIP LOGIC: appears elegantly after page load, then fades out after 3.5 secs.
+        // Also reappears when user hovers the button, then disappears on hover leave after 1.2 secs.
+        let tooltipTimeout = null;
+        let hoverTimeout = null;
+
+        function showTooltipWithTimeout(duration = 3500) {
+            if(!tooltip) return;
+            if(tooltipTimeout) clearTimeout(tooltipTimeout);
+            tooltip.classList.remove('hide');
+            tooltip.classList.add('show');
+            tooltipTimeout = setTimeout(() => {
+                if(tooltip) {
+                    tooltip.classList.remove('show');
+                    tooltip.classList.add('hide');
+                }
+            }, duration);
+        }
+
+        function hideTooltipInstantly() {
+            if(tooltipTimeout) clearTimeout(tooltipTimeout);
+            if(tooltip) {
+                tooltip.classList.remove('show');
+                tooltip.classList.add('hide');
+            }
+        }
+
+        // initial appearance: stylish entrance after page load (1 second delay)
         window.addEventListener('load', () => {
+            setTimeout(() => {
+                if(tooltip) {
+                    tooltip.classList.remove('hide');
+                    tooltip.classList.add('show');
+                    tooltipTimeout = setTimeout(() => {
+                        if(tooltip) {
+                            tooltip.classList.remove('show');
+                            tooltip.classList.add('hide');
+                        }
+                    }, 3600);
+                }
+            }, 1500);
+            
             if(audio) {
                 audio.play().then(() => {
                     updateButtonState();
@@ -1103,33 +1155,50 @@
                     audio.play().then(() => {
                         updateButtonState();
                         setTimeout(() => {
-                            if(audio && !audio.paused) {
-                                audio.muted = false;
-                            }
+                            if(audio && !audio.paused) audio.muted = false;
                         }, 500);
-                    }).catch(err => {
-                        console.log("Autoplay blocked completely");
-                        updateButtonState();
-                    });
+                    }).catch(err => { updateButtonState(); });
                 });
             }
         });
 
+        // Hover interactions: show tooltip on hover, schedule disappearance after mouse leaves
+        if(toggleBtn && tooltip) {
+            toggleBtn.addEventListener('mouseenter', () => {
+                if(hoverTimeout) clearTimeout(hoverTimeout);
+                if(tooltipTimeout) clearTimeout(tooltipTimeout);
+                tooltip.classList.remove('hide');
+                tooltip.classList.add('show');
+            });
+            toggleBtn.addEventListener('mouseleave', () => {
+                if(tooltipTimeout) clearTimeout(tooltipTimeout);
+                hoverTimeout = setTimeout(() => {
+                    if(tooltip) {
+                        tooltip.classList.remove('show');
+                        tooltip.classList.add('hide');
+                    }
+                }, 1000);
+            });
+        }
+
         if(toggleBtn && audio) {
             toggleBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
-                if(audio.muted) {
-                    audio.muted = false;
-                }
-                
+                if(audio.muted) audio.muted = false;
                 if(audio.paused) {
                     audio.play().then(() => {
                         updateButtonState();
+                        // optional: show tooltip briefly again? we keep consistent but ensure no conflict
                     }).catch(err => console.warn("Playback failed:", err));
                 } else {
                     audio.pause();
                     updateButtonState();
+                }
+                // Also show tooltip after click to hint next action? nice touch: briefly shows
+                if(tooltip && tooltip.classList.contains('hide')) {
+                    showTooltipWithTimeout(1800);
+                } else {
+                    showTooltipWithTimeout(1800);
                 }
             });
         }
