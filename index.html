@@ -621,22 +621,22 @@
             z-index: 9999;
             width: 56px;
             height: 56px;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(2px);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15);
-            transition: all 0.25s var(--ease-out);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0);
+            transition: all 05s var(--ease-out);
             border: none;
-            color: white;
+            color: black;
         }
         
         .audio-control:hover {
             transform: scale(1.08);
-            background: rgba(0, 0, 0, 0.85);
+            background: var(--accent-gold);
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(219, 183, 0, 0.6);
         }
         
@@ -666,8 +666,8 @@
             left: 92px;
             z-index: 9998;
             background: rgba(0, 0, 0, 0.096);
-            backdrop-filter: blur(12px);
-            color: var(--black);
+            backdrop-filter: blur(2px);
+            color: var(--dark-gray);
             font-family: var(--font-mono);
             font-size: 0.75rem;
             letter-spacing: 0.12em;
@@ -697,8 +697,8 @@
 
     @media (max-width: 768px) {
         .play-tooltip {
-            bottom: 28px;
-            left: 92px;
+            bottom: 30px;
+            left: 72px;
             font-size: 0.65rem;
             padding: 6px 14px;
         }
