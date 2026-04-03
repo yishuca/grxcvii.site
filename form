@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Client Discovery — GRXCVII Studio</title>
+    <meta name="description" content="Client intake & discovery questionnaire for GRXCVII. Help us understand your vision, goals, and project needs.">
+    <meta name="robots" content="noindex, follow">
+    <meta property="og:title" content="GRXCVII | Client Discovery Form">
+    <meta property="og:description" content="Let's build something exceptional. Tell us about your project.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --white: #FAFAF8;
+            --accent-gold: #dbb700;
+            --dark-gray: #6B6A66;
+            --charcoal: #2A2A28;
+            --black: #000000;
+            --radius-sm: 12px;
+            --radius-md: 24px;
+            --radius-lg: 48px;
+            --radius-full: 999px;
+            --font-display: 'Cormorant Garamond', serif;
+            --font-body: 'DM Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--charcoal);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Floating Blobs - matching main site */
+        .blob-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            width: 75vw;
+            height: 75vw;
+            max-width: 1100px;
+            max-height: 1100px;
+            background: radial-gradient(circle, rgba(111, 36, 129, 0.384) 0%, rgba(200, 70, 60, 0.35) 50%, transparent 80%);
+            bottom: -200vh;
+            left: -25vw;
+            filter: blur(85px);
+            opacity: 0.45;
+        }
+
+        .blob-2 {
+            width: 85vw;
+            height: 85vw;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.267) 0%, rgba(130, 40, 170, 0.4) 60%, transparent 85%);
+            top: -15vh;
+            right: -30vw;
+            filter: blur(95px);
+            opacity: 0.5;
+        }
+
+        .blob-3 {
+            width: 70vw;
+            height: 70vw;
+            background: radial-gradient(circle, rgba(196, 224, 95, 0.288) 0%, rgba(180, 70, 45, 0.35) 55%, transparent 85%);
+            bottom: 5vh;
+            right: -20vw;
+            filter: blur(80px);
+            opacity: 0.48;
+        }
+
+        @media (max-width: 768px) {
+            .blob { filter: blur(55px); opacity: 0.6 !important; }
+            .blob-1, .blob-2, .blob-3 { width: 110vw; height: 110vw; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.4s var(--ease-out);
+            background: rgba(250, 250, 248, 0);
+            backdrop-filter: blur(12px);
+        }
+
+        .nav.scrolled {
+            padding: 16px 40px;
+            background: rgba(77, 77, 77, 0.199);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-decoration: none;
+            color: var(--dark-gray);
+            transition: color 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            color: var(--black);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--dark-gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--black);
+        }
+
+        /* Hamburger to X button - updated styles */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            position: relative;
+            transition: all 0.3s var(--ease-out);
+        }
+
+        .hamburger span {
+            width: 24px;
+            height: 2px;
+            background: var(--dark-gray);
+            transition: all 0.3s var(--ease-out);
+            border-radius: 2px;
+            position: absolute;
+        }
+
+        /* Three lines in default state */
+        .hamburger span:nth-child(1) {
+            transform: translateY(-8px);
+        }
+        .hamburger span:nth-child(2) {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .hamburger span:nth-child(3) {
+            transform: translateY(8px);
+        }
+
+        /* X state (open) */
+        .hamburger.open span:nth-child(1) {
+            transform: rotate(45deg);
+        }
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            visibility: hidden;
+            opacity: 0;
+            display: flex;
+            background: rgba(0, 0, 0, 0.178);
+            backdrop-filter: blur(8px);
+            transition: all 0.4s ease;
+        }
+
+        .mobile-menu.open {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .mobile-menu a {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--black);
+            text-decoration: none;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .mobile-menu a:hover {
+            color: var(--accent-gold);
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .nav { padding: 20px 24px; }
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 45vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 120px 40px 60px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            margin-bottom: 24px;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 300;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: var(--black);
+            max-width: 900px;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--accent-gold);
+        }
+
+        .hero-desc {
+            max-width: 500px;
+            margin-top: 32px;
+            color: var(--dark-gray);
+            font-size: 1.1rem;
+        }
+
+        /* Form Container */
+        .form-container {
+            padding: 40px 40px 120px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .discovery-form {
+            background: rgba(255, 255, 255, 0.151);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
+            padding: 60px;
+            box-shadow: rgba(0, 0, 0, 0.05) 0 20px 40px, rgba(0, 0, 0, 0.322) 0 0 10px inset;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--charcoal);
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: var(--accent-gold);
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-gold);
+        }
+
+        .radio-option label {
+            font-family: var(--font-body);
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        .section-title-form {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin: 48px 0 24px 0;
+            color: var(--black);
+            border-left: 3px solid var(--accent-gold);
+            padding-left: 20px;
+        }
+
+        .section-title-form:first-of-type {
+            margin-top: 0;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255, 217, 0, 0.432);
+            color: var(--black);
+            box-shadow: rgba(0, 0, 0, 0.205) 0 0 10px inset;
+            border: none;
+            border-radius: var(--radius-full);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.35s var(--ease-out);
+            margin-top: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-out);
+            border-radius: inherit;
+            box-shadow: rgba(0, 0, 0, 0.205) 0 0 10px inset;
+        }
+
+        .form-submit:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .form-submit::before { 
+            content: ''; 
+            position: absolute;
+            inset: 0; 
+            background: rgb(250, 250, 250);
+            transform: scaleX(0); 
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-out); 
+            border-radius: inherit; 
+            box-shadow: rgba(0, 0, 0, 0.205) 0 0 10px inset;
+        }
+            
+        .form-submit:hover::before { 
+            transform: scaleX(1); 
+            transform-origin: left; 
+        }
+
+        .form-submit span {
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .form-submit:hover span {
+            color: var(--accent-gold);
+        }
+
+        .form-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .form-message {
+            background: rgba(100, 200, 100, 0.15);
+            border: 1px solid rgba(100, 200, 100, 0.4);
+            border-radius: var(--radius-sm);
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .form-message.error {
+            background: rgba(200, 70, 70, 0.15);
+            border-color: rgba(200, 70, 70, 0.4);
+            color: #b33;
+        }
+
+        .form-message.success {
+            background: rgba(100, 200, 100, 0.15);
+            border-color: rgba(100, 200, 100, 0.4);
+            color: #2a6b2a;
+        }
+
+        .footer {
+            background: var(--black);
+            padding: 48px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-logo {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-decoration: none;
+            color: var(--white);
+        }
+
+        .footer-copy {
+            color: var(--dark-gray);
+            font-size: 0.8rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .footer-links a {
+            color: var(--dark-gray);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .discovery-form {
+                padding: 32px 24px;
+            }
+            .form-container {
+                padding: 20px 24px 80px;
+            }
+            .hero {
+                padding: 100px 24px 40px;
+            }
+            .section-title-form {
+                font-size: 1.5rem;
+                margin: 32px 0 20px;
+            }
+            .radio-group {
+                gap: 16px;
+            }
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="blob-container">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<nav class="nav" id="mainNav">
+    <a href="https://grxcvii.site" class="nav-logo">[=]GRXCVII</a>
+    <ul class="nav-links">
+        <li><a href="#discovery-form">Questionnaire</a></li>
+        <!-- Back to Site link updated to grxcvii.site -->
+        <li><a href="https://grxcvii.site">Back to Site</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+    <a href="#discovery-form">Questionnaire</a>
+    <!-- Back to Site link updated to grxcvii.site -->
+    <a href="https://grxcvii.site">Back to Site</a>
+</div>
+
+<section class="hero">
+    <div>
+        <p class="hero-eyebrow">Client Discovery</p>
+        <h1 class="hero-title">Let's understand <em>your vision</em><br>inside & out.</h1>
+        <p class="hero-desc">Every great website starts with the right questions. Take 10 minutes to complete this form — it helps us skip the guesswork and build something truly tailored to your business.</p>
+    </div>
+</section>
+
+<div class="form-container" id="discovery-form">
+    <div class="discovery-form reveal">
+        <form id="clientDiscoveryForm" method="POST">
+            <!-- FormSubmit configuration - exactly matching your main site -->
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_subject" value="📋 New Client Discovery Form - GRXCVII">
+            
+            <div class="form-message" id="formMessage"></div>
+
+            <!-- SECTION 1: Contact & Business -->
+            <h3 class="section-title-form">1. About You & Your Business</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Your Full Name <span class="required">*</span></label>
+                    <input type="text" name="full_name" required placeholder="e.g., Jordan Blake">
+                </div>
+                <div class="form-group">
+                    <label>Business / Brand Name</label>
+                    <input type="text" name="business_name" placeholder="e.g., Blake Creative">
+                </div>
+                <div class="form-group">
+                    <label>Best Contact (Email, Phone, or Insta) <span class="required">*</span></label>
+                    <input type="text" name="contact_info" required placeholder="email@example.com / @handle / (555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label>Your Role / Title</label>
+                    <input type="text" name="role" placeholder="e.g., Founder, Marketing Director">
+                </div>
+                <div class="form-group full-width">
+                    <label>Briefly describe what your business does. <span class="required">*</span></label>
+                    <textarea name="business_description" required placeholder="Tell us what you sell, offer, or promote..."></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Goals & Audience -->
+            <h3 class="section-title-form">2. Goals & Target Audience</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>What are the top 3 goals for your new website? <span class="required">*</span></label>
+                    <textarea name="website_goals" required placeholder="e.g., generate leads, sell products online, build brand credibility, showcase portfolio..."></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Who is your target audience? (age, location, interests, pain points)</label>
+                    <textarea name="target_audience" placeholder="e.g., Young professionals 25-35 in Boise, looking for premium design services"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>What is the PRIMARY action you want visitors to take on your site?</label>
+                    <input type="text" name="primary_action" placeholder="e.g., Fill out contact form, Make a purchase, Book a consultation, Call business">
+                </div>
+            </div>
+
+            <!-- SECTION 3: Brand & Design Preferences -->
+            <h3 class="section-title-form">3. Brand & Design Vibe</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Do you have an existing logo?</label>
+                    <select name="has_logo">
+                        <option value="">Select...</option>
+                        <option value="Yes, I have a logo and brand guidelines">Yes, with brand guidelines</option>
+                        <option value="Yes, but just a logo file">Yes, just a logo file</option>
+                        <option value="No, I need logo design">No, I need help with logo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Describe your brand in 3-5 words <span class="required">*</span></label>
+                    <input type="text" name="brand_words" required placeholder="e.g., modern, trustworthy, bold, minimal">
+                </div>
+                <div class="form-group full-width">
+                    <label>Share links to 2-3 websites you LOVE (and why)</label>
+                    <textarea name="inspiration" placeholder="URL 1: https://... — I love the clean layout and typography&#10;URL 2: https://... — The color palette feels energetic"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Any websites you DISLIKE? (helps us avoid wrong directions)</label>
+                    <textarea name="dislike_sites" placeholder="Optional: Share what you don't want"></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Features & Functionality -->
+            <h3 class="section-title-form">4. Must-Have Features</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label>Which pages do you definitely need? <span class="required">*</span></label>
+                    <input type="text" name="required_pages" required placeholder="e.g., Home, About, Services, Portfolio, Contact, Blog">
+                </div>
+                <div class="form-group full-width">
+                    <label>Select any special features you need:</label>
+                    <div class="radio-group" style="flex-direction: column; gap: 12px;">
+                        <div class="radio-option"><input type="checkbox" name="features" value="Online Store / E-commerce"> <label>🛒 Online Store / E-commerce</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Appointment Booking System"> <label>📅 Appointment Booking System</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Blog / News Section"> <label>✍️ Blog / News Section</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Member Login / Client Portal"> <label>🔐 Member Login / Client Portal</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Event Calendar"> <label>📆 Event Calendar</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Chat / Live Support"> <label>💬 Chat / Live Support</label></div>
+                        <div class="radio-option"><input type="checkbox" name="features" value="Other (explain below)"> <label>✨ Other (explain below)</label></div>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>If you selected "Other" or want to elaborate on features:</label>
+                    <textarea name="other_features" placeholder="Tell us about integrations (CRM, email marketing like Mailchimp, accounting software, etc.)"></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION 5: Content & Timeline -->
+            <h3 class="section-title-form">5. Content, Timeline & Budget</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Who will provide text & images?</label>
+                    <select name="content_provider">
+                        <option value="">Select...</option>
+                        <option value="I will provide all content">I will provide all content</option>
+                        <option value="I need help with copywriting">I need help with copywriting</option>
+                        <option value="I need photography/asset help">I need photography/asset help</option>
+                        <option value="I'm not sure yet">I'm not sure yet</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ideal launch date?</label>
+                    <input type="text" name="launch_date" placeholder="e.g., Within 1 month, By June 2026, Flexible">
+                </div>
+                <div class="form-group full-width">
+                    <label>What's your estimated budget range for this project?</label>
+                    <select name="budget_range">
+                        <option value="">Select a range...</option>
+                        <option value="$1,000 - $2,500">$1,000 - $2,500</option>
+                        <option value="$2,500 - $5,000">$2,500 - $5,000</option>
+                        <option value="$5,000 - $10,000">$5,000 - $10,000</option>
+                        <option value="$10,000+">$10,000+</option>
+                        <option value="I need a custom quote">I need a custom quote</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label>Any additional context, deadlines, or specific concerns?</label>
+                    <textarea name="additional_notes" placeholder="Tell us anything else we should know..."></textarea>
+                </div>
+            </div>
+
+            <!-- Hidden field to capture selected features as a readable string -->
+            <input type="hidden" name="selected_features" id="selectedFeaturesHidden">
+            
+            <button type="submit" class="form-submit" id="submitBtn">
+                <span>Submit Discovery Form →</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">
+    <a href="https://grxcvii.site" class="footer-logo">GRXCVII</a>
+    <p class="footer-copy">© 2026 GRXCVII. All rights reserved.</p>
+    <div class="footer-links">
+        <a href="#discovery-form">Questionnaire</a>
+        <!-- Back to Site link updated to grxcvii.site -->
+        <a href="https://grxcvii.site">Back to Site</a>
+    </div>
+</footer>
+
+<script>
+    (function() {
+        // Nav scroll effect
+        const nav = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+        });
+
+        // Mobile menu with hamburger to X transformation
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (hamburger && mobileMenu) {
+            hamburger.addEventListener('click', () => {
+                const isOpen = hamburger.classList.toggle('open');
+                mobileMenu.classList.toggle('open', isOpen);
+                document.body.style.overflow = isOpen ? 'hidden' : '';
+            });
+            // Close mobile menu when clicking any link inside it
+            document.querySelectorAll('.mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    hamburger.classList.remove('open');
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+
+        // Smooth scroll for anchor links (only internal # links)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId !== '#') {
+                    const target = document.querySelector(targetId);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+
+        // Reveal animations
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(el => observer.observe(el));
+
+        // Form handling with FormSubmit (same endpoint as main site)
+        const form = document.getElementById('clientDiscoveryForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const msgDiv = document.getElementById('formMessage');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Gather checked features into a readable string
+            const checkboxes = document.querySelectorAll('input[name="features"]:checked');
+            let featuresList = [];
+            checkboxes.forEach(cb => {
+                if (cb.value !== 'Other (explain below)') {
+                    featuresList.push(cb.value);
+                } else {
+                    const otherText = document.querySelector('textarea[name="other_features"]')?.value;
+                    if (otherText && otherText.trim()) featuresList.push(`Other: ${otherText.trim()}`);
+                }
+            });
+            const featuresStr = featuresList.length ? featuresList.join(', ') : 'None selected';
+            document.getElementById('selectedFeaturesHidden').value = featuresStr;
+
+            // Disable button and show loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Sending...</span>';
+            
+            if (msgDiv) {
+                msgDiv.style.display = 'none';
+                msgDiv.className = 'form-message';
+            }
+
+            const formData = new FormData(form);
+            
+            try {
+                // Using the exact same FormSubmit endpoint from your main website
+                const response = await fetch('https://formsubmit.co/ajax/2dbe592043c5fbb7c149c062f5e296dc', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success === true || response.ok) {
+                    if (msgDiv) {
+                        msgDiv.textContent = '✓ Thank you! Your discovery form has been sent. We’ll review and reach out within 24 hours.';
+                        msgDiv.classList.remove('error');
+                        msgDiv.classList.add('success');
+                        msgDiv.style.display = 'block';
+                    }
+                    form.reset();
+                    // Reset checkboxes visually and hidden field
+                    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    document.getElementById('selectedFeaturesHidden').value = '';
+                    // Scroll to message
+                    msgDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        if (msgDiv) msgDiv.style.display = 'none';
+                    }, 8000);
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (err) {
+                if (msgDiv) {
+                    msgDiv.textContent = '❌ Oops! Something went wrong. Please email us directly at grxcvii.site@gmail.com or try again.';
+                    msgDiv.classList.add('error');
+                    msgDiv.classList.remove('success');
+                    msgDiv.style.display = 'block';
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    })();
+</script>
+</body>
+</html>
