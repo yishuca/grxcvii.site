@@ -495,7 +495,7 @@ footer {
     and preload for smooth playback. 
   -->
   <video class="video-background" autoplay loop muted playsinline preload="auto">
-    <source src="./lv_0_20260428133925.mp4" type="video/mp4">
+    <source src="./lv_0_20260428140027.mp4" type="video/mp4">
     <!-- fallback if video fails: contemporary dessert video from Pixabay (fully free) 
          However the above works on mobile but just in case add second source -->
     Your browser does not support the video tag. 
