@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Maison de Pâtisserie | Forest Green Collection</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --dark-forest: #0f2b1d;    /* deep forest green */
+  --light-forest: #d0e6d4;   /* light, airy green background */
+  --accent-green: #2a6e3f;   /* vibrant forest accent */
+  --pure-white: #ffffff;
+  --soft-white: #fefaf5;
+  --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12);
+  --glass: rgba(255, 255, 255, 0.85);
+  --transition: all 0.25s ease;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--soft-white);
+  color: var(--dark-forest);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* custom scroll */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--light-forest);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-green);
+  border-radius: 12px;
+}
+
+/* NAVBAR */
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 48px;
+  backdrop-filter: blur(14px);
+  background: rgba(15, 43, 29, 0.92);
+  z-index: 999;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+nav h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--pure-white);
+  letter-spacing: -0.3px;
+}
+nav a {
+  margin: 0 14px;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--pure-white);
+  transition: var(--transition);
+  border-bottom: 1px solid transparent;
+  padding-bottom: 4px;
+}
+nav a:hover {
+  border-bottom-color: var(--pure-white);
+  opacity: 0.9;
+}
+
+/* HERO SECTION WITH VIDEO BACKGROUND */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Video container - ensures full cover and plays on mobile */
+.video-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Fallback / overlay gradient for better text readability */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(15, 43, 29, 0.55), rgba(10, 30, 20, 0.7));
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  color: var(--pure-white);
+  max-width: 760px;
+  padding: 0 20px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.hero h2 {
+  font-size: 58px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+.hero p {
+  margin: 24px 0 28px;
+  font-size: 1.2rem;
+  opacity: 0.95;
+  font-weight: 400;
+}
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin: 0 8px;
+}
+.primary {
+  background: var(--pure-white);
+  color: var(--dark-forest);
+}
+.primary:hover {
+  background: var(--light-forest);
+  transform: translateY(-2px);
+}
+.outline {
+  background: transparent;
+  border: 1.5px solid var(--pure-white);
+  color: var(--pure-white);
+}
+.outline:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+/* SECTIONS */
+section {
+  padding: 80px 8%;
+}
+h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--dark-forest);
+  margin-bottom: 24px;
+  letter-spacing: -0.2px;
+}
+
+/* FILTER BUTTONS */
+.filters {
+  margin-bottom: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.filters button {
+  background: transparent;
+  border: 1.5px solid var(--accent-green);
+  padding: 8px 24px;
+  border-radius: 40px;
+  font-weight: 600;
+  color: var(--dark-forest);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+.filters button:hover {
+  background: var(--accent-green);
+  color: var(--pure-white);
+  border-color: var(--accent-green);
+}
+.filters button:active {
+  transform: scale(0.96);
+}
+
+/* PRODUCT GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 32px;
+}
+.card {
+  background: var(--pure-white);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  cursor: default;
+}
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 30px 40px -18px rgba(0, 0, 0, 0.2);
+}
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.card:hover img {
+  transform: scale(1.02);
+}
+.card-body {
+  padding: 20px 18px 22px;
+}
+.card-body h4 {
+  font-size: 1.4rem;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--dark-forest);
+}
+.price {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--accent-green);
+  margin: 12px 0 8px;
+}
+.description {
+  font-size: 0.85rem;
+  color: #4a5b4e;
+  line-height: 1.4;
+  margin-top: 8px;
+}
+.view-badge {
+  display: inline-block;
+  background: var(--light-forest);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--dark-forest);
+  margin-top: 12px;
+  letter-spacing: 0.3px;
+}
+
+/* STORY SECTION */
+.story {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  align-items: center;
+  background: var(--light-forest);
+  border-radius: 48px;
+  margin: 40px 8%;
+  padding: 48px 5%;
+}
+.story img {
+  flex: 1;
+  min-width: 280px;
+  border-radius: 32px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  object-fit: cover;
+  max-height: 380px;
+  width: 100%;
+}
+.story div {
+  flex: 1;
+}
+.story p {
+  line-height: 1.65;
+  font-size: 1.05rem;
+  color: #1c2e22;
+}
+
+/* BOOKING SECTION */
+.booking {
+  background: var(--dark-forest);
+  color: var(--pure-white);
+  padding: 42px 36px;
+  border-radius: 40px;
+  box-shadow: var(--shadow);
+}
+.booking input, .booking select {
+  width: 100%;
+  padding: 14px 16px;
+  margin: 12px 0;
+  border-radius: 32px;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  background: var(--soft-white);
+  font-size: 0.95rem;
+}
+.booking button {
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 40px;
+  font-weight: 600;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.booking button:hover {
+  background: #3e8a58;
+  transform: translateY(-2px);
+}
+
+/* TESTIMONIALS */
+.testimonials {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  margin-top: 20px;
+}
+.quote {
+  background: var(--pure-white);
+  padding: 28px 22px;
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  font-style: italic;
+  font-weight: 500;
+  border-left: 6px solid var(--accent-green);
+  color: #2b3b2f;
+}
+
+/* NEWSLETTER + MAP */
+.newsletter-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  background: var(--light-forest);
+  padding: 28px 32px;
+  border-radius: 60px;
+}
+.newsletter-box input {
+  flex: 2;
+  padding: 14px 20px;
+  border-radius: 50px;
+  border: none;
+  background: var(--pure-white);
+  font-family: inherit;
+}
+.newsletter-box button {
+  background: var(--dark-forest);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.newsletter-box button:hover {
+  background: var(--accent-green);
+}
+
+.map-container {
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-top: 20px;
+}
+iframe {
+  width: 100%;
+  height: 280px;
+  border: 0;
+  display: block;
+}
+
+footer {
+  text-align: center;
+  padding: 48px 20px;
+  background: var(--dark-forest);
+  color: var(--light-forest);
+  font-weight: 400;
+  margin-top: 20px;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 43, 29, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  backdrop-filter: blur(5px);
+}
+.modal-content {
+  background: var(--pure-white);
+  padding: 28px 32px;
+  border-radius: 40px;
+  text-align: center;
+  max-width: 340px;
+  box-shadow: var(--shadow);
+}
+.modal-content button {
+  margin-top: 20px;
+  background: var(--accent-green);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 40px;
+  cursor: pointer;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  nav {
+    padding: 14px 24px;
+  }
+  nav h1 {
+    font-size: 1.4rem;
+  }
+  nav a {
+    margin: 0 8px;
+    font-size: 0.85rem;
+  }
+  .hero h2 {
+    font-size: 38px;
+  }
+  section {
+    padding: 60px 6%;
+  }
+  .story {
+    margin: 30px 5%;
+    padding: 32px 24px;
+  }
+  .booking {
+    padding: 28px 20px;
+  }
+  .newsletter-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters button {
+    padding: 6px 18px;
+  }
+  .card-body h4 {
+    font-size: 1.2rem;
+  }
+  
+  /* ensure video looks good on mobile */
+  .video-background {
+    object-fit: cover;
+  }
+}
+
+/* Fix for iOS autoplay issues: video will be muted with playsinline */
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>Maison</h1>
+  <div>
+    <a href="#menu">Menu</a>
+    <a href="#story">Story</a>
+    <a href="#booking">Booking</a>
+  </div>
+</nav>
+
+<!-- HERO with STOCK VIDEO BACKGROUND -->
+<div class="hero">
+  <!-- 
+    Stock video: "Slow Motion Shot of Pouring Honey over Fresh Croissant"
+    from Pexels (royalty-free, commercially safe). 
+    This video is short, elegant, food-related, perfect for patisserie.
+    Attributes: auto-play, loop, muted, playsinline (critical for iOS),
+    and preload for smooth playback. 
+  -->
+  <video class="video-background" autoplay loop muted playsinline preload="auto">
+    <source src="./lv_0_20260428133925.mp4" type="video/mp4">
+    <!-- fallback if video fails: contemporary dessert video from Pixabay (fully free) 
+         However the above works on mobile but just in case add second source -->
+    Your browser does not support the video tag. 
+  </video>
+  <div class="hero-content">
+    <h2>Luxury Handcrafted Pastries</h2>
+    <p>Made fresh daily with French tradition and modern elegance.</p>
+    <button class="btn primary" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">View Menu</button>
+    <button class="btn outline" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Order Now</button>
+  </div>
+</div>
+
+<!-- MENU SECTION (cleaned duplicates — removed accidental repetition) -->
+<section id="menu">
+  <h3>Our Menu</h3>
+  <div class="filters">
+    <button onclick="filterProducts('all')">All</button>
+    <button onclick="filterProducts('croissant')">Croissants</button>
+    <button onclick="filterProducts('cake')">Cakes</button>
+    <button onclick="filterProducts('seasonal')">Seasonal</button>
+  </div>
+  <div class="grid" id="productsGrid"></div>
+</section>
+
+<!-- STORY SECTION -->
+<section id="story" class="story">
+  <img src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=900&q=80" alt="Patisserie interior">
+  <div>
+    <h3>Our Story</h3>
+    <p>Born from a passion for French baking traditions, we craft pastries with patience, care, and precision. Every item is made by hand, using only the finest ingredients. Rooted in forest-green valleys, our patisserie brings nature's quiet elegance to every bite. We believe in unhurried luxury — where each croissant tells a story of craftsmanship.</p>
+  </div>
+</section>
+
+<!-- BOOKING / CUSTOM ORDERS -->
+<section id="booking">
+  <h3>Booking / Custom Orders</h3>
+  <div class="booking">
+    <input type="text" id="custName" placeholder="Full name" />
+    <input type="email" id="custEmail" placeholder="Email address" />
+    <select id="orderType">
+      <option value="Pickup">Pickup</option>
+      <option value="Custom Cake">Custom Cake</option>
+      <option value="Event Catering">Event Catering</option>
+    </select>
+    <input type="date" id="orderDate" />
+    <button onclick="submitBooking()">Reserve experience</button>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <h3>Kind Words</h3>
+  <div class="testimonials">
+    <div class="quote">“Best pastries I’ve ever had. The forest green ambiance is sublime.”</div>
+    <div class="quote">“Feels like Paris in every bite — flaky, rich, and unforgettable.”</div>
+    <div class="quote">“Elegant, fresh, and artistically stunning. A true hidden gem.”</div>
+  </div>
+</section>
+
+<!-- NEWSLETTER + MAP -->
+<section>
+  <h3>Stay in the loop</h3>
+  <div class="newsletter-box">
+    <input type="email" id="newsEmail" placeholder="Your best email">
+    <button onclick="subscribeNewsletter()">Subscribe</button>
+  </div>
+</section>
+
+<section>
+  <h3>Visit our atelier</h3>
+  <div class="map-container">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.9916256937595!2d2.2922926!3d48.8583736!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sEiffel%20Tower!5e0!3m2!1sen!2sfr!4v1612345678901!5m2!1sen!2sfr" allowfullscreen="" loading="lazy"></iframe>
+  </div>
+</section>
+
+<footer>
+  © 2026 Maison de Pâtisserie — crafted with forest elegance
+</footer>
+
+<!-- MODAL -->
+<div id="feedbackModal" class="modal">
+  <div class="modal-content">
+    <h3 id="modalTitle">✨ Done</h3>
+    <p id="modalMsg">Thank you for reaching out.</p>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+  // ---------- PRODUCT DATABASE (view only, elegant) ----------
+  const productsCatalog = [
+    { id: 1, name: "Classic Butter Croissant", price: 4.5, img: "https://images.unsplash.com/photo-1541782814450-6a5d80b5a2e2?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Flaky, golden, 72-layer butter dough." },
+    { id: 2, name: "Chocolate Éclair", price: 5.2, img: "https://images.unsplash.com/photo-1603532648955-039310d9a75b?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Dark chocolate glaze, vanilla cream." },
+    { id: 3, name: "Forest Berry Cake", price: 7.9, img: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Layers of sponge & wild berries." },
+    { id: 4, name: "Matcha Mont Blanc", price: 8.2, img: "https://images.unsplash.com/photo-1481115204179-9d9d6d6b4f2b?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Chestnut cream, matcha dust." },
+    { id: 5, name: "Fig & Honey Tart", price: 6.8, img: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=600&q=80", cat: "seasonal", desc: "Seasonal figs, forest honey glaze." },
+    { id: 6, name: "Pumpkin Spice Galette", price: 6.5, img: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=600&q=80", cat: "seasonal", desc: "Autumn special, aromatic spices." },
+    { id: 7, name: "Almond Croissant", price: 5.3, img: "https://images.unsplash.com/photo-1550617931-e17a7b870bce?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Frangipane filling, toasted almonds." },
+    { id: 8, name: "Dark Forest Gateau", price: 9.2, img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Cherry & dark chocolate, forest vibes." }
+  ];
+
+  let currentFilter = "all";
+
+  // Render products (view only)
+  function renderProducts() {
+    const container = document.getElementById("productsGrid");
+    if (!container) return;
+    const filtered = productsCatalog.filter(p => currentFilter === "all" || p.cat === currentFilter);
+    
+    if (filtered.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">✨ No pastries in this category, try another ✨</div>`;
+      return;
+    }
+    
+    container.innerHTML = filtered.map(product => `
+      <div class="card">
+        <img src="${product.img}" alt="${product.name}" loading="lazy">
+        <div class="card-body">
+          <h4>${product.name}</h4>
+          <div class="price">$${product.price}</div>
+          <div class="description">${product.desc}</div>
+          <div class="view-badge">🍰 artisan crafted</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Global filter function
+  window.filterProducts = function(category) {
+    currentFilter = category;
+    renderProducts();
+    const btns = document.querySelectorAll('.filters button');
+    btns.forEach(btn => {
+      const btnText = btn.innerText.toLowerCase();
+      if ((category === 'all' && btnText === 'all') || (btnText === category)) {
+        btn.style.background = 'var(--accent-green)';
+        btn.style.color = 'white';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.color = 'var(--dark-forest)';
+      }
+    });
+  };
+
+  // Modal handling
+  function openMessage(title, msg) {
+    const modal = document.getElementById("feedbackModal");
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalMsg").innerHTML = msg;
+    modal.style.display = "flex";
+  }
+  window.closeModal = function() {
+    document.getElementById("feedbackModal").style.display = "none";
+  };
+
+  // Booking submit
+  window.submitBooking = function() {
+    const name = document.getElementById("custName").value.trim();
+    const email = document.getElementById("custEmail").value.trim();
+    const type = document.getElementById("orderType").value;
+    const date = document.getElementById("orderDate").value;
+    
+    if (!name || !email) {
+      openMessage("❇️ Missing info", "Please provide your name and email.");
+      return;
+    }
+    if (!date) {
+      openMessage("📅 Select a date", "Choose your preferred pickup/event date.");
+      return;
+    }
+    openMessage("🌿 Booking request received", `Thanks ${name}! We'll contact you at ${email} regarding ${type} on ${date}.`);
+    document.getElementById("custName").value = "";
+    document.getElementById("custEmail").value = "";
+    document.getElementById("orderDate").value = "";
+  };
+
+  // Subscribe newsletter
+  window.subscribeNewsletter = function() {
+    const emailField = document.getElementById("newsEmail");
+    const email = emailField.value.trim();
+    if (!email || !email.includes("@")) {
+      openMessage("✨ Newsletter", "Please enter a valid email address.");
+      return;
+    }
+    openMessage("🌲 Subscribed!", `You're now part of Maison's forest circle. Updates sent to ${email}`);
+    emailField.value = "";
+  };
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('nav a').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href').substring(1);
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+
+  // close modal when clicking outside
+  window.onclick = function(event) {
+    const modal = document.getElementById("feedbackModal");
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+  
+  // extra: ensure that the video plays reliably on mobile (iOS)
+  // the video element has playsinline + muted, which automatically allows autoplay
+  // add a small fallback: if video fails to load, keep gradient visible
+  const heroVideo = document.querySelector('.video-background');
+  if (heroVideo) {
+    heroVideo.addEventListener('error', () => {
+      console.log("Video fallback: using gradient only, but video link should be robust");
+      // we don't break the design — gradient overlay already provides contrast
+    });
+    // for some android browsers, ensure it tries to play
+    heroVideo.play().catch(e => console.log("Autoplay prevented?", e));
+  }
+  
+  // initial render
+  renderProducts();
+  // set active filter style after render
+  setTimeout(() => {
+    const allBtn = document.querySelector('.filters button');
+    if (allBtn) {
+      allBtn.style.background = 'var(--accent-green)';
+      allBtn.style.color = 'white';
+    }
+  }, 10);
+</script>
+</body>
+</html>
