@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Maison de Pâtisserie | Forest Green Collection</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes" />
+<title>It's a Crepe! — Artisan Patisserie | Custom Cakes</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -15,13 +15,12 @@
 }
 
 :root {
-  --dark-forest: #0f2b1d;    /* deep forest green */
-  --light-forest: #d0e6d4;   /* light, airy green background */
-  --accent-green: #2a6e3f;   /* vibrant forest accent */
+  --dark-forest: #0f2b1d;    
+  --light-forest: #d0e6d4;   
+  --accent-green: #2a6e3f;   
   --pure-white: #ffffff;
   --soft-white: #fefaf5;
   --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12);
-  --glass: rgba(255, 255, 255, 0.85);
   --transition: all 0.25s ease;
 }
 
@@ -31,9 +30,9 @@ body {
   color: var(--dark-forest);
   overflow-x: hidden;
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* custom scroll */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -45,7 +44,15 @@ body {
   border-radius: 12px;
 }
 
-/* NAVBAR */
+/* THIN FOREST GREEN BORDER SEPARATOR */
+.separator-border {
+  width: 100%;
+  height: 6px;
+  background: var(--dark-forest);
+  margin: 0;
+  opacity: 0.9;
+}
+
 nav {
   position: fixed;
   top: 0;
@@ -53,45 +60,116 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 48px;
+  padding: 12px clamp(1rem, 5vw, 2.5rem);
   backdrop-filter: blur(14px);
-  background: rgba(15, 43, 29, 0.92);
+  background: rgba(15, 43, 29, 0.94);
   z-index: 999;
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nav-logo {
+  height: 44px;
+  width: auto;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 nav h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
+  font-size: clamp(1.2rem, 5vw, 1.7rem);
   font-weight: 700;
   color: var(--pure-white);
   letter-spacing: -0.3px;
 }
-nav a {
-  margin: 0 14px;
+.nav-links {
+  display: flex;
+  gap: clamp(1rem, 3vw, 2rem);
+}
+.nav-links a {
   text-decoration: none;
   font-weight: 500;
   color: var(--pure-white);
   transition: var(--transition);
   border-bottom: 1px solid transparent;
   padding-bottom: 4px;
+  font-size: clamp(0.85rem, 3vw, 1rem);
 }
-nav a:hover {
+.nav-links a:hover {
   border-bottom-color: var(--pure-white);
-  opacity: 0.9;
 }
 
-/* HERO SECTION WITH VIDEO BACKGROUND */
+.hamburger {
+  display: none;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+}
+.hamburger span {
+  position: absolute;
+  width: 24px;
+  height: 2.2px;
+  background: var(--pure-white);
+  border-radius: 20px;
+  transition: all 0.35s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  left: 10px;
+}
+.hamburger span:nth-child(1) { top: 14px; transform-origin: left center; }
+.hamburger span:nth-child(2) { top: 21px; transform-origin: center; width: 24px; }
+.hamburger span:nth-child(3) { top: 28px; transform-origin: left center; }
+.hamburger.open { background: var(--accent-green); }
+.hamburger.open span:nth-child(1) { transform: rotate(43deg) translateX(5px) translateY(-1px); width: 26px; }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0.2); }
+.hamburger.open span:nth-child(3) { transform: rotate(-43deg) translateX(5px) translateY(1px); width: 26px; }
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 75%;
+  max-width: 320px;
+  height: 100vh;
+  background: rgba(15, 43, 29, 0.98);
+  backdrop-filter: blur(20px);
+  z-index: 1000;
+  padding: 100px 32px 32px;
+  transition: right 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.mobile-menu a {
+  color: var(--pure-white);
+  text-decoration: none;
+  font-size: 1.6rem;
+  font-weight: 500;
+  font-family: 'Playfair Display', serif;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  padding-bottom: 10px;
+  transition: 0.2s;
+}
+.mobile-menu.open { right: 0; }
+
 .hero {
   position: relative;
   height: 100vh;
+  min-height: 560px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
 }
-
-/* Video container - ensures full cover and plays on mobile */
 .video-background {
   position: absolute;
   top: 0;
@@ -100,9 +178,9 @@ nav a:hover {
   height: 100%;
   object-fit: cover;
   z-index: 1;
+  filter: blur(8px);
+  transform: scale(1.02);
 }
-
-/* Fallback / overlay gradient for better text readability */
 .hero::after {
   content: '';
   position: absolute;
@@ -110,623 +188,765 @@ nav a:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(rgba(15, 43, 29, 0.55), rgba(10, 30, 20, 0.7));
+  background: linear-gradient(rgba(15, 43, 29, 0.6), rgba(10, 30, 20, 0.75));
   z-index: 2;
-  pointer-events: none;
 }
-
 .hero-content {
   position: relative;
   z-index: 10;
   color: var(--pure-white);
-  max-width: 760px;
+  max-width: 820px;
   padding: 0 20px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
-.hero h2 {
-  font-size: 58px;
-  font-family: 'Playfair Display', serif;
-  font-weight: 800;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+.hero-logo-img {
+  max-width: 130px;
+  width: min(30%, 130px);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(4px);
+  margin-bottom: 20px;
 }
-.hero p {
-  margin: 24px 0 28px;
-  font-size: 1.2rem;
+.hero h2 { 
+  font-size: clamp(2.2rem, 10vw, 5rem); 
+  font-family: 'Playfair Display', serif; 
+  font-weight: 800; 
+  margin-bottom: 16px; 
+  letter-spacing: -0.02em;
+}
+.hero p { 
+  margin: 0 0 28px; 
+  font-size: clamp(1rem, 4vw, 1.3rem); 
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
   opacity: 0.95;
-  font-weight: 400;
-}
-.btn {
-  padding: 12px 28px;
-  border: none;
-  border-radius: 40px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-  font-family: inherit;
-  font-size: 0.95rem;
-  margin: 0 8px;
-}
-.primary {
-  background: var(--pure-white);
-  color: var(--dark-forest);
-}
-.primary:hover {
-  background: var(--light-forest);
-  transform: translateY(-2px);
-}
-.outline {
-  background: transparent;
-  border: 1.5px solid var(--pure-white);
-  color: var(--pure-white);
-}
-.outline:hover {
-  background: rgba(255,255,255,0.15);
-  transform: translateY(-2px);
 }
 
-/* SECTIONS */
-section {
-  padding: 80px 8%;
+section { 
+  padding: 70px clamp(1rem, 6%, 5rem); 
 }
 h3 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.4rem;
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
   font-weight: 700;
   color: var(--dark-forest);
-  margin-bottom: 24px;
-  letter-spacing: -0.2px;
+  margin-bottom: 16px;
 }
+.section-sub { color: #4a5b4e; margin-bottom: 40px; font-size: 1rem; }
 
-/* FILTER BUTTONS */
-.filters {
-  margin-bottom: 40px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+/* ========== FULL WIDTH MENU SHOWCASE ========== */
+.menu-showcase {
+  width: 100%;
+  background: var(--soft-white);
 }
-.filters button {
-  background: transparent;
-  border: 1.5px solid var(--accent-green);
-  padding: 8px 24px;
-  border-radius: 40px;
-  font-weight: 600;
-  color: var(--dark-forest);
-  cursor: pointer;
-  transition: var(--transition);
-  font-size: 0.9rem;
-}
-.filters button:hover {
-  background: var(--accent-green);
-  color: var(--pure-white);
-  border-color: var(--accent-green);
-}
-.filters button:active {
-  transform: scale(0.96);
-}
-
-/* PRODUCT GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 32px;
-}
-.card {
+.menu-image-container {
+  width: 100%;
   background: var(--pure-white);
-  border-radius: 28px;
+}
+.menu-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  max-height: 85vh;
+  margin: 0 auto;
+}
+
+/* ========== FULL WIDTH SNAP CAROUSEL ========== */
+.carousel-section {
+  width: 100%;
+  padding: 0;
+  background: var(--soft-white);
+  position: relative;
+  overflow: hidden;
+}
+.carousel-container {
+  width: 100%;
+  position: relative;
+  background: #1a2a1f;
   overflow: hidden;
   box-shadow: var(--shadow);
-  transition: var(--transition);
-  cursor: default;
+  touch-action: pan-y pinch-zoom;
 }
-.card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 40px -18px rgba(0, 0, 0, 0.2);
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+  will-change: transform;
 }
-.card img {
+.carousel-slide {
+  flex: 0 0 100%;
   width: 100%;
-  height: 220px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.carousel-slide img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  display: block;
+  pointer-events: none;
 }
-.card:hover img {
-  transform: scale(1.02);
+.carousel-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 0;
+  background: transparent;
+  z-index: 15;
 }
-.card-body {
-  padding: 20px 18px 22px;
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(2px);
 }
-.card-body h4 {
-  font-size: 1.4rem;
+.dot.active {
+  background: var(--accent-green);
+  width: 28px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 5px white;
+}
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 43, 29, 0.7);
+  backdrop-filter: blur(8px);
+  color: white;
+  border: none;
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 60px;
+  cursor: pointer;
+  transition: 0.2s;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 300;
+}
+.carousel-arrow:hover {
+  background: var(--dark-forest);
+  transform: translateY(-50%) scale(1.02);
+}
+.arrow-left { left: 24px; }
+.arrow-right { right: 24px; }
+
+/* ========== TWO-COLUMN FLAVOR GRID ========== */
+.custom-cake-compact {
+  background: linear-gradient(145deg, #f8f6f0 0%, #fefaf5 100%);
+  border-radius: 48px;
+  padding: 40px clamp(20px, 5%, 48px);
+  margin: 20px 0;
+}
+.flavor-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  margin-bottom: 0;
+}
+.flavor-card {
+  background: var(--pure-white);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s;
+}
+.flavor-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 28px 36px -16px rgba(0,0,0,0.18);
+}
+.card-header {
+  background: var(--dark-forest);
+  padding: 18px 24px;
+  color: var(--pure-white);
   font-family: 'Playfair Display', serif;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
   font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--dark-forest);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
 }
-.price {
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: var(--accent-green);
-  margin: 12px 0 8px;
+.card-header .count {
+  background: rgba(255,255,255,0.2);
+  padding: 4px 14px;
+  border-radius: 40px;
+  font-size: 0.8rem;
+  font-weight: 400;
 }
-.description {
+.specialty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 24px;
+}
+.flavor-badge {
+  background: #f3efe8;
+  padding: 10px 16px;
+  border-radius: 60px;
   font-size: 0.85rem;
-  color: #4a5b4e;
-  line-height: 1.4;
-  margin-top: 8px;
-}
-.view-badge {
-  display: inline-block;
-  background: var(--light-forest);
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--dark-forest);
-  margin-top: 12px;
-  letter-spacing: 0.3px;
+  transition: all 0.2s;
+  text-align: center;
+  border-left: 4px solid var(--accent-green);
+  cursor: default;
+  backdrop-filter: blur(2px);
+}
+.flavor-badge:hover {
+  background: var(--light-forest);
+  transform: translateX(5px);
 }
 
-/* STORY SECTION */
+/* ========== FIXED ABOUT ME / STORY SECTION - FULLY RESPONSIVE ========== */
 .story {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 48px;
   align-items: center;
+  justify-content: center;
   background: var(--light-forest);
   border-radius: 48px;
-  margin: 40px 8%;
-  padding: 48px 5%;
-}
-.story img {
-  flex: 1;
-  min-width: 280px;
-  border-radius: 32px;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
-  object-fit: cover;
-  max-height: 380px;
-  width: 100%;
-}
-.story div {
-  flex: 1;
-}
-.story p {
-  line-height: 1.65;
-  font-size: 1.05rem;
-  color: #1c2e22;
+  margin: 40px auto;
+  padding: 48px clamp(24px, 6%, 70px);
+  width: calc(100% - 2rem);
+  max-width: 1400px;
 }
 
-/* BOOKING SECTION */
+.story-img-wrapper {
+  flex: 1;
+  min-width: 260px;
+  max-width: 500px;
+}
+
+.story-img {
+  width: 100%;
+  height: auto;
+  border-radius: 32px;
+  object-fit: cover;
+  box-shadow: var(--shadow);
+  display: block;
+}
+
+.story-content {
+  flex: 1.2;
+  min-width: 260px;
+}
+
+.story-content h3 {
+  margin-bottom: 20px;
+  color: var(--dark-forest);
+}
+
+.story-content p {
+  font-size: clamp(1rem, 3vw, 1.1rem);
+  line-height: 1.6;
+  color: #2c3e2f;
+}
+
+/* Mobile and tablet adjustments for story section */
+@media (max-width: 968px) {
+  .story {
+    flex-direction: column;
+    text-align: center;
+    gap: 32px;
+    padding: 40px clamp(20px, 5%, 40px);
+    margin: 30px 20px;
+    width: auto;
+  }
+  
+  .story-img-wrapper {
+    max-width: 80%;
+    margin: 0 auto;
+  }
+  
+  .story-content {
+    text-align: center;
+  }
+  
+  .story-content h3 {
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .story {
+    padding: 32px 20px;
+    margin: 20px 16px;
+    border-radius: 32px;
+    gap: 24px;
+  }
+  
+  .story-img-wrapper {
+    max-width: 100%;
+  }
+  
+  .story-img {
+    max-height: 280px;
+    object-fit: cover;
+  }
+  
+  .story-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+}
+
+/* ========== BOOKING & OTHER SECTIONS ========== */
 .booking {
   background: var(--dark-forest);
   color: var(--pure-white);
-  padding: 42px 36px;
-  border-radius: 40px;
-  box-shadow: var(--shadow);
+  padding: 42px clamp(24px, 5%, 48px);
+  border-radius: 44px;
 }
-.booking input, .booking select {
+.booking input, .booking select, .booking textarea {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 18px;
   margin: 12px 0;
-  border-radius: 32px;
+  border-radius: 48px;
   border: none;
   font-family: 'Inter', sans-serif;
   background: var(--soft-white);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 .booking button {
   background: var(--accent-green);
   color: white;
   border: none;
-  padding: 12px 28px;
-  border-radius: 40px;
+  padding: 14px 32px;
+  border-radius: 60px;
   font-weight: 600;
-  margin-top: 12px;
+  font-size: 1rem;
+  margin-top: 16px;
   cursor: pointer;
   transition: 0.2s;
 }
-.booking button:hover {
-  background: #3e8a58;
-  transform: translateY(-2px);
-}
+.booking button:hover { background: #3e8a58; transform: scale(0.98);}
 
-/* TESTIMONIALS */
-.testimonials {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
-  margin-top: 20px;
-}
-.quote {
-  background: var(--pure-white);
-  padding: 28px 22px;
-  border-radius: 28px;
-  box-shadow: var(--shadow);
-  font-style: italic;
-  font-weight: 500;
-  border-left: 6px solid var(--accent-green);
-  color: #2b3b2f;
-}
-
-/* NEWSLETTER + MAP */
 .newsletter-box {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   align-items: center;
   background: var(--light-forest);
-  padding: 28px 32px;
-  border-radius: 60px;
+  padding: 20px 28px;
+  border-radius: 80px;
 }
-.newsletter-box input {
-  flex: 2;
-  padding: 14px 20px;
-  border-radius: 50px;
-  border: none;
-  background: var(--pure-white);
-  font-family: inherit;
-}
+.newsletter-box input { flex: 2; padding: 14px 22px; border-radius: 60px; border: none; font-size: 1rem;}
 .newsletter-box button {
   background: var(--dark-forest);
   color: white;
   border: none;
   padding: 14px 32px;
-  border-radius: 50px;
-  font-weight: 600;
+  border-radius: 60px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: 0.2s;
+  font-weight: 500;
 }
-.newsletter-box button:hover {
-  background: var(--accent-green);
-}
-
-.map-container {
-  border-radius: 32px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  margin-top: 20px;
-}
-iframe {
-  width: 100%;
-  height: 280px;
-  border: 0;
-  display: block;
-}
-
-footer {
-  text-align: center;
-  padding: 48px 20px;
-  background: var(--dark-forest);
-  color: var(--light-forest);
-  font-weight: 400;
-  margin-top: 20px;
-}
-
-/* MODAL */
+.map-container { border-radius: 36px; overflow: hidden; margin-top: 28px; box-shadow: var(--shadow);}
+iframe { width: 100%; height: 320px; border: 0; }
+footer { text-align: center; padding: 48px 20px; background: var(--dark-forest); color: var(--light-forest); margin-top: 20px; font-size: 0.9rem;}
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(15, 43, 29, 0.75);
+  background: rgba(15, 43, 29, 0.85);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1100;
-  backdrop-filter: blur(5px);
+  z-index: 1200;
+  backdrop-filter: blur(8px);
 }
 .modal-content {
   background: var(--pure-white);
-  padding: 28px 32px;
-  border-radius: 40px;
+  padding: 32px 36px;
+  border-radius: 48px;
   text-align: center;
-  max-width: 340px;
-  box-shadow: var(--shadow);
+  max-width: 380px;
+  width: 85%;
 }
-.modal-content button {
-  margin-top: 20px;
-  background: var(--accent-green);
-  color: white;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 40px;
-  cursor: pointer;
+.modal-content button { margin-top: 24px; background: var(--accent-green); color: white; border: none; padding: 12px 28px; border-radius: 40px; cursor: pointer; }
+
+@keyframes gentleFlash {
+  0% { background-color: #ffefc0; transform: scale(1);}
+  50% { background-color: #ffe6a3; transform: scale(1.01);}
+  100% { background-color: #ffefc0; transform: scale(1);}
+}
+.booking-highlight {
+  animation: gentleFlash 0.7s ease-in-out 2;
+  border-radius: 44px;
 }
 
-/* responsive */
+@media (max-width: 860px) {
+  .flavor-two-col { grid-template-columns: 1fr; gap: 28px; }
+  .specialty-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .card-header { padding: 14px 18px; }
+  .specialty-grid { padding: 18px; }
+  .carousel-arrow { width: 40px; height: 40px; font-size: 26px; }
+  .arrow-left { left: 12px; }
+  .arrow-right { right: 12px; }
+}
+
 @media (max-width: 768px) {
-  nav {
-    padding: 14px 24px;
-  }
-  nav h1 {
-    font-size: 1.4rem;
-  }
-  nav a {
-    margin: 0 8px;
-    font-size: 0.85rem;
-  }
-  .hero h2 {
-    font-size: 38px;
-  }
-  section {
-    padding: 60px 6%;
-  }
-  .story {
-    margin: 30px 5%;
-    padding: 32px 24px;
-  }
-  .booking {
-    padding: 28px 20px;
-  }
-  .newsletter-box {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .filters button {
-    padding: 6px 18px;
-  }
-  .card-body h4 {
-    font-size: 1.2rem;
-  }
-  
-  /* ensure video looks good on mobile */
-  .video-background {
-    object-fit: cover;
-  }
+  nav { padding: 12px 20px; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .hero h2 { font-size: 44px; }
+  section { padding: 50px 5%; }
+  .custom-cake-compact { padding: 28px 18px; border-radius: 32px; }
+  .flavor-two-col { gap: 20px; }
+  .flavor-badge { font-size: 0.75rem; padding: 8px 12px; }
+  .carousel-slide img { aspect-ratio: 4 / 3; }
+  .carousel-dots { bottom: 12px; gap: 8px; }
+  .dot { width: 8px; height: 8px; }
+  .dot.active { width: 22px; }
+  .newsletter-box { border-radius: 32px; flex-direction: column; align-items: stretch; }
+  .newsletter-box button { width: 100%; }
+  .booking input, .booking select { font-size: 0.9rem; }
 }
-
-/* Fix for iOS autoplay issues: video will be muted with playsinline */
+@media (min-width: 769px) { .mobile-menu { display: none; } }
+@media (min-width: 1400px) {
+  .carousel-slide img { aspect-ratio: 21 / 9; max-height: 650px; }
+  .menu-img { max-height: 70vh; }
+}
 </style>
 </head>
 <body>
 
 <nav>
-  <h1>Maison</h1>
-  <div>
-    <a href="#menu">Menu</a>
+  <div class="nav-left">
+    <img class="nav-logo" src="./IMG_20260428_140936_288.jpg" alt="Logo" />
+    <h1>It's a Crepe!</h1>
+  </div>
+  <div class="nav-links">
+    <a href="#customFlavors">Custom Cakes</a>
     <a href="#story">Story</a>
     <a href="#booking">Booking</a>
   </div>
+  <div class="hamburger" id="hamburgerBtn">
+    <span></span><span></span><span></span>
+  </div>
 </nav>
 
-<!-- HERO with STOCK VIDEO BACKGROUND -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#customFlavors" class="mobile-link">Custom Cakes</a>
+  <a href="#story" class="mobile-link">Our Story</a>
+  <a href="#booking" class="mobile-link">Booking</a>
+</div>
+
 <div class="hero">
-  <!-- 
-    Stock video: "Slow Motion Shot of Pouring Honey over Fresh Croissant"
-    from Pexels (royalty-free, commercially safe). 
-    This video is short, elegant, food-related, perfect for patisserie.
-    Attributes: auto-play, loop, muted, playsinline (critical for iOS),
-    and preload for smooth playback. 
-  -->
-  <video class="video-background" autoplay loop muted playsinline preload="auto">
-    <source src="./lv_0_20260428140027.mp4" type="video/mp4">
-    <!-- fallback if video fails: contemporary dessert video from Pixabay (fully free) 
-         However the above works on mobile but just in case add second source -->
-    Your browser does not support the video tag. 
+  <video class="video-background" autoplay loop muted playsinline>
+    <source src="./lv_0_20260428133925.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
-    <h2>Luxury Handcrafted Pastries</h2>
-    <p>Made fresh daily with French tradition and modern elegance.</p>
-    <button class="btn primary" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">View Menu</button>
-    <button class="btn outline" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Order Now</button>
+    <div><img class="hero-logo-img" src="./IMG_20260428_140936_288.jpg" alt="It's a Crepe!" /></div>
+    <h2>It's a Crepe!</h2>
+    <p>Bring the flavor and fun to your special day with us!</p>
   </div>
 </div>
 
-<!-- MENU SECTION (cleaned duplicates — removed accidental repetition) -->
-<section id="menu">
-  <h3>Our Menu</h3>
-  <div class="filters">
-    <button onclick="filterProducts('all')">All</button>
-    <button onclick="filterProducts('croissant')">Croissants</button>
-    <button onclick="filterProducts('cake')">Cakes</button>
-    <button onclick="filterProducts('seasonal')">Seasonal</button>
+<div class="separator-border"></div>
+
+<div class="menu-showcase" id="menuImageSection">
+  <div class="menu-image-container">
+    <img class="menu-img" src="./unnamed.png" alt="It's a Crepe! Signature Menu" onerror="this.onerror=null; this.src='./unnamed.png'">
   </div>
-  <div class="grid" id="productsGrid"></div>
+</div>
+<div class="separator-border"></div>
+
+<!-- FULL WIDTH SNAP CAROUSEL -->
+<div class="carousel-section">
+  <div class="carousel-container" id="carouselContainer">
+    <div class="carousel-track" id="carouselTrack">
+      <div class="carousel-slide"><img src="./IMG_20260429_234432_694.jpg" alt="Artisan Crepe cake" draggable="false"></div>
+      <div class="carousel-slide"><img src="./IMG_20260429_234432_696.jpg" alt="Delicious pastry" draggable="false"></div>
+      <div class="carousel-slide"><img src="./IMG_20260429_234432_695.jpg" alt="Signature dessert" draggable="false"></div>
+      <div class="carousel-slide"><img src="./IMG_20260429_234432_698.jpg" alt="Celebration cake" draggable="false"></div>
+      <div class="carousel-slide"><img src="./IMG_20260429_234432_697.jpg" alt="Gourmet treat" draggable="false"></div>
+    </div>
+    <button class="carousel-arrow arrow-left" id="prevBtn" aria-label="Previous">‹</button>
+    <button class="carousel-arrow arrow-right" id="nextBtn" aria-label="Next">›</button>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </div>
+</div>
+
+<section id="customFlavors" class="custom-cake-compact">
+  <h3>Create Your Own ✨</h3>  
+  <div class="flavor-two-col">
+    <div class="flavor-card">
+      <div class="card-header">🍰 Cake Flavors <span class="count">36</span></div>
+      <div class="specialty-grid" id="cakeFlavorsGrid"></div>
+    </div>
+    <div class="flavor-card">
+      <div class="card-header">🥄 Fillings & Creams <span class="count">21</span></div>
+      <div class="specialty-grid" id="fillingsGrid"></div>
+    </div>
+  </div>
 </section>
 
-<!-- STORY SECTION -->
-<section id="story" class="story">
-  <img src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=900&q=80" alt="Patisserie interior">
-  <div>
-    <h3>Our Story</h3>
-    <p>Born from a passion for French baking traditions, we craft pastries with patience, care, and precision. Every item is made by hand, using only the finest ingredients. Rooted in forest-green valleys, our patisserie brings nature's quiet elegance to every bite. We believe in unhurried luxury — where each croissant tells a story of craftsmanship.</p>
-  </div>
-</section>
-
-<!-- BOOKING / CUSTOM ORDERS -->
 <section id="booking">
-  <h3>Booking / Custom Orders</h3>
-  <div class="booking">
-    <input type="text" id="custName" placeholder="Full name" />
-    <input type="email" id="custEmail" placeholder="Email address" />
+  <h3>Request & Custom Orders</h3>
+  <div class="booking" id="bookingFormContainer">
+    <input type="text" id="custName" placeholder="Full name *" />
+    <input type="email" id="custEmail" placeholder="Email address *" />
     <select id="orderType">
-      <option value="Pickup">Pickup</option>
-      <option value="Custom Cake">Custom Cake</option>
-      <option value="Event Catering">Event Catering</option>
+      <option value="Custom Cake Order">🎂 Custom Cake Order</option>
+      <option value="Inquiry about pastries">🥐 Pastry Inquiry</option>
+      <option value="Event Catering">🎉 Event Catering</option>
     </select>
+    <textarea id="customMessage" rows="3" placeholder="Tell me your dream combination! Example: 'Pistachio cake + Nutella ganache + brownie chunks'"></textarea>
     <input type="date" id="orderDate" />
-    <button onclick="submitBooking()">Reserve experience</button>
+    <button onclick="submitBooking()">Send Inquiry →</button>
+    <p style="font-size:0.7rem; margin-top:14px; opacity:0.75;">We'll reply within 24h with pricing & availability.</p>
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
 <section>
-  <h3>Kind Words</h3>
-  <div class="testimonials">
-    <div class="quote">“Best pastries I’ve ever had. The forest green ambiance is sublime.”</div>
-    <div class="quote">“Feels like Paris in every bite — flaky, rich, and unforgettable.”</div>
-    <div class="quote">“Elegant, fresh, and artistically stunning. A true hidden gem.”</div>
-  </div>
-</section>
-
-<!-- NEWSLETTER + MAP -->
-<section>
-  <h3>Stay in the loop</h3>
+  <h3>Stay in the loop!</h3>
   <div class="newsletter-box">
     <input type="email" id="newsEmail" placeholder="Your best email">
     <button onclick="subscribeNewsletter()">Subscribe</button>
   </div>
 </section>
 
-<section>
-  <h3>Visit our atelier</h3>
-  <div class="map-container">
-    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.9916256937595!2d2.2922926!3d48.8583736!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sEiffel%20Tower!5e0!3m2!1sen!2sfr!4v1612345678901!5m2!1sen!2sfr" allowfullscreen="" loading="lazy"></iframe>
+<!-- FIXED RESPONSIVE ABOUT ME SECTION -->
+<section id="story" class="story">
+  <div class="story-img-wrapper">
+    <img class="story-img" src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?auto=format&fit=crop&w=900&q=80" alt="Arijana Alic baking at It's a Crepe!">
+  </div>
+  <div class="story-content">
+    <h3>About me!</h3>
+    <p>Hi! I'm Arijana Alic, a 19-year-old baker from Eagle, Idaho, and the proud owner of It's a Crepe! I've always had a love for baking and sharing food with others. I started this food truck to turn that passion into something real. Whether you're grabbing a quick bite or inviting us to your event, I'm so glad you're here. Thank you for supporting my dream!</p>
   </div>
 </section>
 
-<footer>
-  © 2026 Maison de Pâtisserie — crafted with forest elegance
-</footer>
+<section>
+  <h3>Come Visit!</h3>
+  <div class="map-container">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d92263.80777156369!2d-116.46730581719173!3d43.72625795380528!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x54afaaa29029fcdb%3A0x3ad04fff6ebb4a3a!2sEagle%2C%20ID!5e0!3m2!1sen!2sus!4v1777524077969!5m2!1sen!2sus" allowfullscreen="" loading="lazy"></iframe>
+  </div>
+</section>
 
-<!-- MODAL -->
+<footer>© 2026 It's a Crepe! — Artisan Patisserie</footer>
+
 <div id="feedbackModal" class="modal">
   <div class="modal-content">
-    <h3 id="modalTitle">✨ Done</h3>
-    <p id="modalMsg">Thank you for reaching out.</p>
+    <h3 id="modalTitle">✨ Thank you</h3>
+    <p id="modalMsg">We'll be in touch shortly.</p>
     <button onclick="closeModal()">Close</button>
   </div>
 </div>
 
 <script>
-  // ---------- PRODUCT DATABASE (view only, elegant) ----------
-  const productsCatalog = [
-    { id: 1, name: "Classic Butter Croissant", price: 4.5, img: "https://images.unsplash.com/photo-1541782814450-6a5d80b5a2e2?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Flaky, golden, 72-layer butter dough." },
-    { id: 2, name: "Chocolate Éclair", price: 5.2, img: "https://images.unsplash.com/photo-1603532648955-039310d9a75b?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Dark chocolate glaze, vanilla cream." },
-    { id: 3, name: "Forest Berry Cake", price: 7.9, img: "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Layers of sponge & wild berries." },
-    { id: 4, name: "Matcha Mont Blanc", price: 8.2, img: "https://images.unsplash.com/photo-1481115204179-9d9d6d6b4f2b?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Chestnut cream, matcha dust." },
-    { id: 5, name: "Fig & Honey Tart", price: 6.8, img: "https://images.unsplash.com/photo-1542826438-bd32f43d626f?auto=format&fit=crop&w=600&q=80", cat: "seasonal", desc: "Seasonal figs, forest honey glaze." },
-    { id: 6, name: "Pumpkin Spice Galette", price: 6.5, img: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=600&q=80", cat: "seasonal", desc: "Autumn special, aromatic spices." },
-    { id: 7, name: "Almond Croissant", price: 5.3, img: "https://images.unsplash.com/photo-1550617931-e17a7b870bce?auto=format&fit=crop&w=600&q=80", cat: "croissant", desc: "Frangipane filling, toasted almonds." },
-    { id: 8, name: "Dark Forest Gateau", price: 9.2, img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80", cat: "cake", desc: "Cherry & dark chocolate, forest vibes." }
+  // Flavor data
+  const cakeFlavorsList = [
+    "Vanilla Bean", "Almond Amaretto", "Lemon Curd Cake", "Dark Chocolate Fudge", "Toasted Coconut", 
+    "Pistachio Dream", "Hazelnut Praline", "Cherry Coffee Chocolate", "Oreo Cookies & Cream", 
+    "Red Velvet Luxe", "Biscoff Crunch", "Gingerbread Spice", "Chocolate Brownie Bliss",
+    "Strawberry Sundae", "Almond Praline", "Chocolate Milkshake", "Raspberry Chiffon",
+    "Dark Chocolate Mocha", "Hazelnut Caramel Pear", "Berry Yogurt Dream",
+    "Lemon Meringue Blueberry", "Chocolate Baileys Espresso", "Mango Strawberry Cream",
+    "Raffaello Dream", "Ferrero Rocher", "Snickers Bar Cake", "Twix Caramel Crunch", 
+    "Kitkat Crunch", "Banana Caramel Gingerbread", "Pistachio Strawberry Apricot", 
+    "Dark Chocolate Orange", "Pina Colada", "Black Forest Cherry", "Chocolate Classic",
+    "Vanilla Bean", "Red Velvet Luxe"
   ];
-
-  let currentFilter = "all";
-
-  // Render products (view only)
-  function renderProducts() {
-    const container = document.getElementById("productsGrid");
-    if (!container) return;
-    const filtered = productsCatalog.filter(p => currentFilter === "all" || p.cat === currentFilter);
-    
-    if (filtered.length === 0) {
-      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px;">✨ No pastries in this category, try another ✨</div>`;
-      return;
-    }
-    
-    container.innerHTML = filtered.map(product => `
-      <div class="card">
-        <img src="${product.img}" alt="${product.name}" loading="lazy">
-        <div class="card-body">
-          <h4>${product.name}</h4>
-          <div class="price">$${product.price}</div>
-          <div class="description">${product.desc}</div>
-          <div class="view-badge">🍰 artisan crafted</div>
-        </div>
-      </div>
-    `).join('');
+  const fillingsList = [
+    "Coconut mousse", "Raffaello", "Mascarpone coconut cream", "Condensed milk custard",
+    "Fruit (fresh & compote)", "Whipped caramel", "Butterscotch ganache", "Milk chocolate cream",
+    "White chocolate crunch", "Coffee ganache", "Peanut buttercream", "Milk chocolate mousse",
+    "Nutella mousse", "Nutella ganache", "Mango confit", "Strawberry confit", "Raspberry mousse",
+    "Oreo filling", "Biscoff spread", "Cream cheese", "Brownie chunks"
+  ];
+  
+  function renderFlavorGrids() {
+    const cakeContainer = document.getElementById("cakeFlavorsGrid");
+    const fillingsContainer = document.getElementById("fillingsGrid");
+    if (cakeContainer) cakeContainer.innerHTML = cakeFlavorsList.map(flavor => `<div class="flavor-badge">${flavor}</div>`).join('');
+    if (fillingsContainer) fillingsContainer.innerHTML = fillingsList.map(flavor => `<div class="flavor-badge">${flavor}</div>`).join('');
   }
+  renderFlavorGrids();
 
-  // Global filter function
-  window.filterProducts = function(category) {
-    currentFilter = category;
-    renderProducts();
-    const btns = document.querySelectorAll('.filters button');
-    btns.forEach(btn => {
-      const btnText = btn.innerText.toLowerCase();
-      if ((category === 'all' && btnText === 'all') || (btnText === category)) {
-        btn.style.background = 'var(--accent-green)';
-        btn.style.color = 'white';
-      } else {
-        btn.style.background = 'transparent';
-        btn.style.color = 'var(--dark-forest)';
-      }
-    });
-  };
-
-  // Modal handling
   function openMessage(title, msg) {
     const modal = document.getElementById("feedbackModal");
     document.getElementById("modalTitle").innerText = title;
     document.getElementById("modalMsg").innerHTML = msg;
     modal.style.display = "flex";
   }
-  window.closeModal = function() {
-    document.getElementById("feedbackModal").style.display = "none";
-  };
-
-  // Booking submit
+  window.closeModal = () => document.getElementById("feedbackModal").style.display = "none";
+  
   window.submitBooking = function() {
     const name = document.getElementById("custName").value.trim();
     const email = document.getElementById("custEmail").value.trim();
-    const type = document.getElementById("orderType").value;
-    const date = document.getElementById("orderDate").value;
-    
-    if (!name || !email) {
-      openMessage("❇️ Missing info", "Please provide your name and email.");
+    if (!name || !email || !email.includes("@")) {
+      openMessage("Missing info", "Please provide name and valid email address.");
       return;
     }
-    if (!date) {
-      openMessage("📅 Select a date", "Choose your preferred pickup/event date.");
-      return;
-    }
-    openMessage("🌿 Booking request received", `Thanks ${name}! We'll contact you at ${email} regarding ${type} on ${date}.`);
+    openMessage("🌿 Inquiry received", `Thanks ${name}! We'll reply within 24h at ${email}.`);
     document.getElementById("custName").value = "";
     document.getElementById("custEmail").value = "";
     document.getElementById("orderDate").value = "";
-  };
-
-  // Subscribe newsletter
-  window.subscribeNewsletter = function() {
-    const emailField = document.getElementById("newsEmail");
-    const email = emailField.value.trim();
-    if (!email || !email.includes("@")) {
-      openMessage("✨ Newsletter", "Please enter a valid email address.");
-      return;
-    }
-    openMessage("🌲 Subscribed!", `You're now part of Maison's forest circle. Updates sent to ${email}`);
-    emailField.value = "";
-  };
-
-  // Smooth scroll for nav links
-  document.querySelectorAll('nav a').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      e.preventDefault();
-      const targetId = this.getAttribute('href').substring(1);
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  });
-
-  // close modal when clicking outside
-  window.onclick = function(event) {
-    const modal = document.getElementById("feedbackModal");
-    if (event.target === modal) {
-      modal.style.display = "none";
-    }
+    document.getElementById("customMessage").value = "";
+    document.getElementById("orderType").selectedIndex = 0;
   };
   
-  // extra: ensure that the video plays reliably on mobile (iOS)
-  // the video element has playsinline + muted, which automatically allows autoplay
-  // add a small fallback: if video fails to load, keep gradient visible
-  const heroVideo = document.querySelector('.video-background');
-  if (heroVideo) {
-    heroVideo.addEventListener('error', () => {
-      console.log("Video fallback: using gradient only, but video link should be robust");
-      // we don't break the design — gradient overlay already provides contrast
+  window.subscribeNewsletter = function() {
+    const email = document.getElementById("newsEmail").value.trim();
+    if (!email || !email.includes("@")) openMessage("Newsletter", "A valid email is required.");
+    else { openMessage("🌲 Subscribed!", `Updates & treats info sent to ${email}`); document.getElementById("newsEmail").value = ""; }
+  };
+
+  // CAROUSEL LOGIC
+  const track = document.getElementById('carouselTrack');
+  const slides = Array.from(document.querySelectorAll('.carousel-slide'));
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const dotsContainer = document.getElementById('carouselDots');
+  let currentIndex = 0;
+  let autoInterval;
+  let isDragging = false;
+  let startPos = 0;
+
+  function updateCarousel(instant = false) {
+    if (!track) return;
+    const shift = -currentIndex * 100;
+    if (instant) {
+      track.style.transition = 'none';
+      track.style.transform = `translateX(${shift}%)`;
+      track.offsetHeight;
+      track.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+    } else {
+      track.style.transform = `translateX(${shift}%)`;
+    }
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+  }
+
+  function createDots() {
+    if (!dotsContainer) return;
+    dotsContainer.innerHTML = '';
+    slides.forEach((_, idx) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (idx === currentIndex) dot.classList.add('active');
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        stopAutoSlide();
+        currentIndex = idx;
+        updateCarousel();
+        startAutoSlide();
+      });
+      dotsContainer.appendChild(dot);
     });
-    // for some android browsers, ensure it tries to play
-    heroVideo.play().catch(e => console.log("Autoplay prevented?", e));
+  }
+
+  function nextSlide() { currentIndex = (currentIndex + 1) % slides.length; updateCarousel(); }
+  function prevSlide() { currentIndex = (currentIndex - 1 + slides.length) % slides.length; updateCarousel(); }
+  
+  function startAutoSlide() { if (autoInterval) clearInterval(autoInterval); autoInterval = setInterval(() => { nextSlide(); }, 4800); }
+  function stopAutoSlide() { if (autoInterval) { clearInterval(autoInterval); autoInterval = null; } }
+
+  function handleTouchStart(e) {
+    stopAutoSlide();
+    isDragging = true;
+    startPos = e.touches ? e.touches[0].clientX : e.clientX;
+    track.style.transition = 'none';
   }
   
-  // initial render
-  renderProducts();
-  // set active filter style after render
-  setTimeout(() => {
-    const allBtn = document.querySelector('.filters button');
-    if (allBtn) {
-      allBtn.style.background = 'var(--accent-green)';
-      allBtn.style.color = 'white';
+  function handleTouchMove(e) {
+    if (!isDragging) return;
+    const currentPos = e.touches ? e.touches[0].clientX : e.clientX;
+    const diff = currentPos - startPos;
+    const percentShift = (diff / track.parentElement.offsetWidth) * 100;
+    let newTransform = -currentIndex * 100 + percentShift;
+    newTransform = Math.min(Math.max(newTransform, -((slides.length - 1) * 100)), 0);
+    track.style.transform = `translateX(${newTransform}%)`;
+  }
+  
+  function handleTouchEnd(e) {
+    if (!isDragging) { startAutoSlide(); return; }
+    isDragging = false;
+    const endPos = e.changedTouches ? e.changedTouches[0].clientX : (e.clientX || startPos);
+    const diff = endPos - startPos;
+    const threshold = 45;
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      } else {
+        currentIndex = (currentIndex + 1) % slides.length;
+      }
     }
-  }, 10);
+    track.style.transition = 'transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+    updateCarousel();
+    startAutoSlide();
+  }
+
+  function attachDragEvents() {
+    const container = document.getElementById('carouselContainer');
+    if (!container) return;
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd);
+    container.addEventListener('mousedown', handleTouchStart);
+    window.addEventListener('mousemove', (e) => { if (isDragging) handleTouchMove(e); });
+    window.addEventListener('mouseup', handleTouchEnd);
+    container.addEventListener('dragstart', (e) => e.preventDefault());
+  }
+
+  if (slides.length && track) {
+    createDots();
+    updateCarousel(true);
+    startAutoSlide();
+    attachDragEvents();
+    prevBtn.addEventListener('click', () => { stopAutoSlide(); prevSlide(); startAutoSlide(); });
+    nextBtn.addEventListener('click', () => { stopAutoSlide(); nextSlide(); startAutoSlide(); });
+    const container = document.querySelector('.carousel-container');
+    if (container) {
+      container.addEventListener('mouseenter', stopAutoSlide);
+      container.addEventListener('mouseleave', startAutoSlide);
+    }
+    window.addEventListener('resize', () => updateCarousel());
+  }
+
+  // Mobile menu
+  const hamburger = document.getElementById("hamburgerBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener("click", (e) => { e.stopPropagation(); mobileMenu.classList.toggle("open"); hamburger.classList.toggle("open"); });
+    document.querySelectorAll(".mobile-link").forEach(link => {
+      link.addEventListener("click", (e) => {
+        mobileMenu.classList.remove("open"); hamburger.classList.remove("open");
+        const targetId = link.getAttribute("href").substring(1);
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        e.preventDefault();
+      });
+    });
+    document.addEventListener("click", (e) => {
+      if (mobileMenu.classList.contains("open") && !mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+        mobileMenu.classList.remove("open"); hamburger.classList.remove("open");
+      }
+    });
+  }
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const targetId = this.getAttribute('href');
+      if (targetId === "#" || targetId === "") return;
+      const targetElement = document.querySelector(targetId);
+      if (targetElement) { e.preventDefault(); targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
 </script>
 </body>
 </html>
