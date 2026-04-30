@@ -621,12 +621,12 @@ footer { text-align: center; padding: 48px 20px; background: var(--dark-forest);
 
 <div class="hero">
   <video class="video-background" autoplay loop muted playsinline>
-    <source src="./lv_0_20260428140027.mp4" type="video/mp4">
+    <source src="./lv_0_20260428133925.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
     <div><img class="hero-logo-img" src="./IMG_20260428_140936_288.jpg" alt="It's a Crepe!" /></div>
     <h2>It's a Crepe!</h2>
-    <p>Bring the flavor and fun to your special day with us!</p>
+    <p>Bring the flavor and fun to your special day!</p>
   </div>
 </div>
 
@@ -649,6 +649,8 @@ footer { text-align: center; padding: 48px 20px; background: var(--dark-forest);
       <div class="carousel-slide"><img src="./IMG_20260429_234432_698.jpg" alt="Celebration cake" draggable="false"></div>
       <div class="carousel-slide"><img src="./IMG_20260429_234432_697.jpg" alt="Gourmet treat" draggable="false"></div>
     </div>
+    <button class="" id="prevBtn" aria-label="Previous">‹</button>
+    <button class="" id="nextBtn" aria-label="Next">›</button>
     <div class="carousel-dots" id="carouselDots"></div>
   </div>
 </div>
@@ -782,8 +784,6 @@ footer { text-align: center; padding: 48px 20px; background: var(--dark-forest);
   // CAROUSEL LOGIC
   const track = document.getElementById('carouselTrack');
   const slides = Array.from(document.querySelectorAll('.carousel-slide'));
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
   const dotsContainer = document.getElementById('carouselDots');
   let currentIndex = 0;
   let autoInterval;
