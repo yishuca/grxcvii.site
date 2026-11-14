@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>This Is The Only Level</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100vh;
+    height: 100dvh;
+    background: #08080f;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #wrap {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+  #container {
+    position: relative;
+    width: min(calc(100vw - 16px), calc((100vh - 16px) * 1.8));
+    width: min(calc(100vw - 16px), calc((100dvh - 16px) * 1.8));
+    aspect-ratio: 900 / 500;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 0 80px rgba(80,120,255,0.15), 0 0 0 1px rgba(255,255,255,0.06);
+    touch-action: none;
+  }
+  #hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    color: #e9ecff;
+  }
+  #top-left {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+    font-size: clamp(9px, 1.4vmin, 13px);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(140,150,200,0.95);
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+  #timer-bar {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    width: clamp(80px, 18vw, 180px);
+    height: 8px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+    display: none;
+  }
+  #timer-fill {
+    height: 100%;
+    width: 100%;
+    background: #4ade80;
+    transition: background 0.2s;
+  }
+  #hint {
+    position: absolute;
+    bottom: 3%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: clamp(12px, 2.1vmin, 20px);
+    font-weight: 800;
+    color: #e9ecff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    letter-spacing: 0.01em;
+    padding: 0 16px;
+  }
+  #message {
+    position: absolute;
+    top: 38%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: clamp(22px, 5vmin, 44px);
+    font-weight: 900;
+    color: #f87171;
+    text-shadow: 0 0 24px rgba(248,113,113,0.6);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  #touch {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+  }
+  @media (pointer: coarse), (max-width: 800px) {
+    #touch { display: block; }
+  }
+  #touch button {
+    position: absolute;
+    pointer-events: auto;
+    background: rgba(255,255,255,0.10);
+    border: 2px solid rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.8);
+    font-size: clamp(16px, 3vmin, 26px);
+    font-weight: 700;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.06s, transform 0.06s;
+    cursor: pointer;
+  }
+  #touch button.active {
+    background: rgba(255,255,255,0.32);
+    transform: scale(0.95);
+  }
+  #btn-left {
+    left: 3%;
+    bottom: 16%;
+    width: 12%;
+  }
+  #btn-right {
+    left: 17%;
+    bottom: 16%;
+    width: 12%;
+  }
+  #btn-jump {
+    right: 3%;
+    bottom: 20%;
+    width: 16%;
+  }
+  #win {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,8,16,0.94);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #e9ecff;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  #win.show { display: flex; }
+  #win h1 {
+    font-size: clamp(26px, 6vmin, 52px);
+    color: #4ade80;
+    margin-bottom: 8px;
+    font-weight: 900;
+  }
+  #win p {
+    font-size: clamp(13px, 2vmin, 19px);
+    color: #c9d0ff;
+    margin-bottom: 24px;
+    opacity: 0.85;
+    max-width: 80%;
+    line-height: 1.5;
+  }
+  #win button {
+    font-size: clamp(14px, 2vmin, 18px);
+    padding: 12px 32px;
+    background: #4ade80;
+    color: #062;
+    border: none;
+    border-radius: 999px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.1s;
+  }
+  #win button:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="container">
+    <canvas id="game" width="900" height="500"></canvas>
+    <div id="hud">
+      <div id="top-left">STAGE 1 / 28</div>
+      <div id="timer-bar"><div id="timer-fill"></div></div>
+      <div id="hint">Reach the door.</div>
+      <div id="message"></div>
+    </div>
+    <div id="touch">
+      <button id="btn-left" aria-label="Move left">&#9664;</button>
+      <button id="btn-right" aria-label="Move right">&#9654;</button>
+      <button id="btn-jump" aria-label="Jump">&#9650;</button>
+    </div>
+    <div id="win">
+      <h1>YOU ESCAPED!</h1>
+      <p>You beat all 28 versions of the only level.</p>
+      <button id="restart-btn">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     CONSTANTS & CANVAS
+     ============================================================ */
+  var W = 900, H = 500;
+  var FLOOR_Y = 440;
+  var CEIL_Y = 18;
+  var BASE_SIZE = 26;
+  var DOOR_W = 46;
+  var DOOR_H = 64;
+
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+
+  var hintEl = document.getElementById('hint');
+  var messageEl = document.getElementById('message');
+  var topLeftEl = document.getElementById('top-left');
+  var timerBarEl = document.getElementById('timer-bar');
+  var timerFillEl = document.getElementById('timer-fill');
+  var winEl = document.getElementById('win');
+  var restartBtn = document.getElementById('restart-btn');
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function sign(v) { return v < 0 ? -1 : 1; }
+  function aabb(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+           a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  /* ============================================================
+     INPUT
+     ============================================================ */
+  var keys = { left: false, right: false, jump: false };
+  var jumpBuffer = 0;
+
+  function handleKey(down, e) {
+    var k = e.key.toLowerCase();
+    var handled = true;
+    if (k === 'arrowleft' || k === 'a') keys.left = down;
+    else if (k === 'arrowright' || k === 'd') keys.right = down;
+    else if (k === 'arrowup' || k === 'w' || k === ' ') {
+      if (down && !keys.jump) jumpBuffer = 8;
+      keys.jump = down;
+    } else if (k === 'r') {
+      if (down && game.won) restartGame();
+    } else handled = false;
+    if (handled) e.preventDefault();
+  }
+  window.addEventListener('keydown', function (e) { handleKey(true, e); });
+  window.addEventListener('keyup', function (e) { handleKey(false, e); });
+
+  function bindButton(el, key, isJump) {
+    function onDown(e) {
+      e.preventDefault();
+      if (isJump && !keys.jump) jumpBuffer = 8;
+      keys[key] = true;
+      el.classList.add('active');
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    function onUp(e) {
+      e.preventDefault();
+      keys[key] = false;
+      el.classList.remove('active');
+    }
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onUp);
+    el.addEventListener('lostpointercapture', onUp);
+  }
+  bindButton(document.getElementById('btn-left'), 'left', false);
+  bindButton(document.getElementById('btn-right'), 'right', false);
+  bindButton(document.getElementById('btn-jump'), 'jump', true);
+
+  /* ============================================================
+     LEVEL DEFINITIONS
+     ============================================================ */
+  var WALLS = [
+    { x: 0,   y: 0,   w: 900, h: 18 },
+    { x: 0,   y: 440, w: 900, h: 60 },
+    { x: 0,   y: 0,   w: 18,  h: 500 },
+    { x: 882, y: 0,   w: 18,  h: 500 }
+  ];
+
+  var DEFAULT_PLATFORMS = [
+    { x: 150, y: 330, w: 150, h: 18 },
+    { x: 390, y: 250, w: 150, h: 18 },
+    { x: 630, y: 330, w: 150, h: 18 }
+  ];
+
+  var LEVELS = [
+    // 1 — tutorial
+    { hint: 'Reach the door.' },
+
+    // 2 — no jumping
+    { hint: "You can't jump.",
+      setup: function (f) { f.canJump = false; } },
+
+    // 3 — inverted controls
+    { hint: 'Left is right.',
+      setup: function (f) { f.invertX = true; } },
+
+    // 4 — ice
+    { hint: 'Slippery ice.',
+      setup: function (f) { f.ice = true; } },
+
+    // 5 — darkness
+    { hint: "It's dark in here.",
+      setup: function (f) { f.darkness = true; } },
+
+    // 6 — tiny
+    { hint: "You're tiny.",
+      setup: function (f) { f.playerScale = 0.5; } },
+
+    // 7 — giant
+    { hint: "You're huge.",
+      setup: function (f) { f.playerScale = 2.2; } },
+
+    // 8 — low gravity
+    { hint: 'Moon gravity.',
+      setup: function (f) { f.gravity = 0.22; f.jump = 8.5; } },
+
+    // 9 — reverse gravity
+    { hint: 'Upside down.',
+      setup: function (f) { f.gravityDir = -1; } },
+
+    // 10 — shy door
+    { hint: 'The door runs away.',
+      setup: function (f) { f.doorFlees = 2.8; } },
+
+    // 11 — wind
+    { hint: 'Strong headwind.',
+      setup: function (f) { f.wind = -2.2; } },
+
+    // 12 — time limit
+    { hint: '8 seconds.',
+      setup: function (f) { f.timeLimit = 8; } },
+
+    // 13 — backwards
+    { hint: 'The exit is behind you.',
+      layout: function (L) {
+        L.playerStart = { x: 800 };
+        L.doorPos = { x: 60 };
+      } },
+
+    // 14 — speed
+    { hint: 'Sonic speed.',
+      setup: function (f) { f.speed = 10; f.jump = 14; f.gravity = 0.85; } },
+
+    // 15 — double jump
+    { hint: 'Jump twice.',
+      setup: function (f) { f.doubleJump = true; } },
+
+    // 16 — precision platforms
+    { hint: 'Tiny platforms.',
+      platforms: function () {
+        return [
+          { x: 180, y: 380, w: 50, h: 18 },
+          { x: 320, y: 320, w: 50, h: 18 },
+          { x: 460, y: 260, w: 50, h: 18 },
+          { x: 600, y: 320, w: 50, h: 18 },
+          { x: 720, y: 380, w: 50, h: 18 }
+        ];
+      } },
+
+    // 17 — moving platforms
+    { hint: 'Ride the platforms.',
+      platforms: function () {
+        return [
+          { x: 150, y: 330, w: 100, h: 18, moving: { axis: 'x', range: 100, speed: 1.5 } },
+          { x: 380, y: 260, w: 100, h: 18, moving: { axis: 'y', range: 60, speed: 1.2 } },
+          { x: 620, y: 320, w: 100, h: 18, moving: { axis: 'x', range: 80, speed: 1.8 } }
+        ];
+      } },
+
+    // 18 — gravity flip
+    { hint: 'Gravity flips.',
+      setup: function (f) { f.gravityFlip = 120; } },
+
+    // 19 — switch puzzle
+    { hint: 'Find the switch.',
+      switches: [{ x: 400, y: FLOOR_Y - 30, w: 30, h: 30 }] },
+
+    // 20 — two switches
+    { hint: 'Two switches.',
+      switches: [
+        { x: 300, y: FLOOR_Y - 30, w: 30, h: 30 },
+        { x: 700, y: FLOOR_Y - 30, w: 30, h: 30 }
+      ] },
+
+    // 21 — invisible platforms
+    { hint: 'Some platforms are hidden.',
+      platforms: function () {
+        return [
+          { x: 150, y: 350, w: 80, h: 18 },
+          { x: 300, y: 300, w: 80, h: 18, invisible: true },
+          { x: 450, y: 250, w: 80, h: 18, invisible: true },
+          { x: 600, y: 300, w: 80, h: 18, invisible: true },
+          { x: 750, y: 350, w: 80, h: 18 }
+        ];
+      } },
+
+    // 22 — moving door
+    { hint: 'Catch the moving door.',
+      setup: function (f) { f.doorMoving = true; } },
+
+    // 23 — teleporters
+    { hint: 'Portals.',
+      teleporters: [
+        { x: 200, y: FLOOR_Y - 50, w: 50, h: 50, toX: 750, toY: FLOOR_Y - 80 },
+        { x: 750, y: FLOOR_Y - 80, w: 50, h: 50, toX: 200, toY: FLOOR_Y - 50 }
+      ] },
+
+    // 24 — maze
+    { hint: 'Find your way.',
+      platforms: function () {
+        return [
+          { x: 120, y: 380, w: 80, h: 18 },
+          { x: 120, y: 300, w: 80, h: 18 },
+          { x: 250, y: 220, w: 80, h: 18 },
+          { x: 400, y: 300, w: 80, h: 18 },
+          { x: 400, y: 380, w: 80, h: 18 },
+          { x: 550, y: 300, w: 80, h: 18 },
+          { x: 550, y: 220, w: 80, h: 18 },
+          { x: 700, y: 300, w: 80, h: 18 },
+          { x: 700, y: 380, w: 80, h: 18 }
+        ];
+      } },
+
+    // 25 — dark + moving
+    { hint: 'Dark and moving.',
+      setup: function (f) { f.darkness = true; },
+      platforms: function () {
+        return [
+          { x: 150, y: 330, w: 100, h: 18, moving: { axis: 'y', range: 60, speed: 1.2 } },
+          { x: 400, y: 280, w: 100, h: 18, moving: { axis: 'x', range: 80, speed: 1.5 } },
+          { x: 650, y: 320, w: 100, h: 18, moving: { axis: 'y', range: 80, speed: 1.8 } }
+        ];
+      } },
+
+    // 26 — race
+    { hint: 'Beat the clock.',
+      setup: function (f) { f.timeLimit = 6; f.doorFlees = 2.5; } },
+
+    // 27 — chaos
+    { hint: 'Everything.',
+      setup: function (f) { f.gravityFlip = 90; f.darkness = true; f.playerScale = 1.2; },
+      platforms: function () {
+        return [
+          { x: 150, y: 330, w: 80, h: 18, moving: { axis: 'x', range: 60, speed: 1.5 } },
+          { x: 400, y: 260, w: 80, h: 18, invisible: true },
+          { x: 600, y: 320, w: 80, h: 18, moving: { axis: 'y', range: 50, speed: 2 } }
+        ];
+      } },
+
+    // 28 — final
+    { hint: 'Good luck.',
+      setup: function (f) {
+        f.ice = true;
+        f.wind = -1.5;
+        f.doubleJump = true;
+        f.doorFlees = 1.5;
+      },
+      platforms: function () {
+        return [
+          { x: 200, y: 380, w: 80, h: 18 },
+          { x: 350, y: 300, w: 80, h: 18, moving: { axis: 'x', range: 40, speed: 1.5 } },
+          { x: 550, y: 380, w: 80, h: 18 },
+          { x: 700, y: 300, w: 80, h: 18 }
+        ];
+      } }
+  ];
+
+  /* ============================================================
+     GAME STATE
+     ============================================================ */
+  var game = {
+    stage: 0,
+    won: false,
+    fade: 0,
+    level: null
+  };
+
+  /* ============================================================
+     LEVEL LOADING
+     ============================================================ */
+  function buildFlags() {
+    return {
+      canJump: true,
+      invertX: false,
+      ice: false,
+      darkness: false,
+      gravity: 0.62,
+      gravityDir: 1,
+      playerScale: 1,
+      speed: 4.6,
+      jump: 12.6,
+      wind: 0,
+      timeLimit: 0,
+      doorFlees: 0,
+      doorMoving: false,
+      gravityFlip: 0,
+      doubleJump: false,
+      bouncy: false
+    };
+  }
+
+  function loadLevel(index) {
+    var def = LEVELS[index];
+    var flags = buildFlags();
+    if (def.setup) def.setup(flags);
+
+    var level = {
+      index: index,
+      flags: flags,
+      solids: [],
+      player: null,
+      door: null,
+      switches: [],
+      teleporters: [],
+      state: {},
+      timeLeft: flags.timeLimit,
+      spawn: {}
+    };
+
+    // walls
+    for (var i = 0; i < WALLS.length; i++) {
+      var w = WALLS[i];
+      level.solids.push({ x: w.x, y: w.y, w: w.w, h: w.h });
+    }
+
+    // platforms
+    var platforms = typeof def.platforms === 'function' ? def.platforms()
+                  : (def.platforms || DEFAULT_PLATFORMS);
+    for (var j = 0; j < platforms.length; j++) {
+      var p = platforms[j];
+      var solid = { x: p.x, y: p.y, w: p.w, h: p.h };
+      if (p.invisible) solid.invisible = true;
+      if (p.moving) {
+        solid.moving = p.moving;
+        solid.originalX = p.x;
+        solid.originalY = p.y;
+      }
+      level.solids.push(solid);
+    }
+
+    // player
+    var size = BASE_SIZE * flags.playerScale;
+    var px = def.playerStart ? def.playerStart.x : 60;
+    var py = flags.gravityDir > 0 ? FLOOR_Y - size : CEIL_Y;
+    if (def.playerStart && def.playerStart.y !== undefined) py = def.playerStart.y;
+
+    level.player = {
+      x: px, y: py, w: size, h: size,
+      vx: 0, vy: 0, onGround: false,
+      jumpsLeft: 1, teleCooldown: 0
+    };
+
+    // door
+    var dx = def.doorPos ? def.doorPos.x : 828;
+    var dy = flags.gravityDir > 0 ? FLOOR_Y - DOOR_H : CEIL_Y;
+    if (def.doorPos && def.doorPos.y !== undefined) dy = def.doorPos.y;
+    level.door = { x: dx, y: dy, w: DOOR_W, h: DOOR_H };
+
+    // switches
+    if (def.switches) {
+      for (var k = 0; k < def.switches.length; k++) {
+        level.switches.push({
+          x: def.switches[k].x,
+          y: def.switches[k].y,
+          w: def.switches[k].w,
+          h: def.switches[k].h,
+          activated: false
+        });
+      }
+    }
+
+    // teleporters
+    if (def.teleporters) {
+      for (var t = 0; t < def.teleporters.length; t++) {
+        var tp = def.teleporters[t];
+        level.teleporters.push({
+          x: tp.x, y: tp.y, w: tp.w, h: tp.h,
+          toX: tp.toX, toY: tp.toY
+        });
+      }
+    }
+
+    level.spawn = {
+      px: level.player.x,
+      py: level.player.y,
+      dx: level.door.x,
+      dy: level.door.y
+    };
+
+    game.level = level;
+    game.stage = index;
+    game.fade = 1;
+
+    // HUD
+    hintEl.textContent = def.hint;
+    topLeftEl.textContent = 'STAGE ' + (index + 1) + ' / ' + LEVELS.length;
+    if (flags.timeLimit > 0) {
+      timerBarEl.style.display = 'block';
+    } else {
+      timerBarEl.style.display = 'none';
+    }
+  }
+
+  function respawn() {
+    var L = game.level;
+    var p = L.player;
+    p.x = L.spawn.px;
+    p.y = L.spawn.py;
+    p.vx = 0;
+    p.vy = 0;
+    p.teleCooldown = 0;
+    L.door.x = L.spawn.dx;
+    L.door.y = L.spawn.dy;
+    L.timeLeft = L.flags.timeLimit;
+    for (var i = 0; i < L.switches.length; i++) L.switches[i].activated = false;
+  }
+
+  function nextLevel() {
+    var next = game.stage + 1;
+    if (next >= LEVELS.length) {
+      game.won = true;
+      winEl.classList.add('show');
+    } else {
+      loadLevel(next);
+    }
+  }
+
+  function restartGame() {
+    game.won = false;
+    winEl.classList.remove('show');
+    loadLevel(0);
+  }
+
+  restartBtn.addEventListener('click', restartGame);
+
+  /* ============================================================
+     PHYSICS
+     ============================================================ */
+  function moveX(p, dt, solids) {
+    p.x += p.vx * dt;
+    for (var i = 0; i < solids.length; i++) {
+      var s = solids[i];
+      if (!aabb(p, s)) continue;
+      if (p.vx > 0) p.x = s.x - p.w;
+      else if (p.vx < 0) p.x = s.x + s.w;
+      p.vx = 0;
+    }
+  }
+
+  function moveY(p, dt, solids) {
+    p.y += p.vy * dt;
+    p.onGround = false;
+    for (var i = 0; i < solids.length; i++) {
+      var s = solids[i];
+      if (!aabb(p, s)) continue;
+      if (p.vy > 0) {
+        p.y = s.y - p.h;
+        p.vy = 0;
+        p.onGround = true;
+      } else if (p.vy < 0) {
+        p.y = s.y + s.h;
+        p.vy = 0;
+        p.onGround = true;
+      }
+    }
+  }
+
+  function checkWall(p, side, solids) {
+    var testX = side < 0 ? p.x - 4 : p.x + p.w;
+    var test = { x: testX, y: p.y + 4, w: 4, h: p.h - 8 };
+    for (var i = 0; i < solids.length; i++) {
+      if (aabb(test, solids[i])) return true;
+    }
+    return false;
+  }
+
+  function pushOut(p, solids) {
+    for (var i = 0; i < solids.length; i++) {
+      var s = solids[i];
+      if (!aabb(p, s)) continue;
+      var oL = (p.x + p.w) - s.x;
+      var oR = (s.x + s.w) - p.x;
+      var oT = (p.y + p.h) - s.y;
+      var oB = (s.y + s.h) - p.y;
+      var minX = Math.min(oL, oR);
+      var minY = Math.min(oT, oB);
+      if (minX < minY) {
+        if (oL < oR) p.x = s.x - p.w;
+        else p.x = s.x + s.w;
+      } else {
+        if (oT < oB) p.y = s.y - p.h;
+        else p.y = s.y + s.h;
+      }
+    }
+  }
+
+  /* ============================================================
+     UPDATE
+     ============================================================ */
+  function update(dt) {
+    game.fade = Math.max(0, game.fade - dt * 0.08);
+    if (game.won) return;
+
+    var L = game.level;
+    var f = L.flags;
+    var p = L.player;
+    var solids = L.solids;
+
+    if (jumpBuffer > 0) jumpBuffer -= dt;
+    if (p.teleCooldown > 0) p.teleCooldown -= dt;
+
+    // ---- message fade ----
+    if (L.state.messageTimer > 0) {
+      L.state.messageTimer -= dt;
+      messageEl.style.opacity = clamp(L.state.messageTimer / 30, 0, 1);
+    }
+
+    // ---- time limit ----
+    if (f.timeLimit > 0) {
+      L.timeLeft -= dt / 60;
+      if (L.timeLeft <= 0) {
+        respawn();
+        L.state.message = 'Too slow!';
+        L.state.messageTimer = 90;
+        messageEl.textContent = 'Too slow!';
+        messageEl.style.opacity = 1;
+        return;
+      }
+      var frac = clamp(L.timeLeft / f.timeLimit, 0, 1);
+      timerFillEl.style.width = (frac * 100) + '%';
+      timerFillEl.style.background = frac > 0.35 ? '#4ade80' : '#f87171';
+    }
+
+    // ---- gravity flip ----
+    if (f.gravityFlip > 0) {
+      L.state.flipTimer = (L.state.flipTimer === undefined ? f.gravityFlip : L.state.flipTimer) - dt;
+      if (L.state.flipTimer <= 0) {
+        f.gravityDir *= -1;
+        L.state.flipTimer = f.gravityFlip;
+      }
+    }
+
+    // ---- input ----
+    var dir = 0;
+    if (keys.left) dir -= 1;
+    if (keys.right) dir += 1;
+    if (f.invertX) dir = -dir;
+
+    // ---- horizontal movement ----
+    if (f.ice) {
+      p.vx += dir * 0.5 * dt;
+      p.vx *= Math.pow(0.94, dt);
+      p.vx = clamp(p.vx, -7, 7);
+    } else {
+      p.vx = dir * f.speed + f.wind;
+    }
+
+    // ---- reset air jumps on ground ----
+    if (p.onGround) p.jumpsLeft = f.doubleJump ? 2 : 1;
+
+    // ---- gravity ----
+    p.vy += f.gravity * f.gravityDir * dt;
+    p.vy = clamp(p.vy, -30, 30);
+
+    // ---- jump input ----
+    if (jumpBuffer > 0) {
+      if (f.canJump && p.jumpsLeft > 0) {
+        p.vy = -f.jump * f.gravityDir;
+        p.jumpsLeft--;
+        p.onGround = false;
+        jumpBuffer = 0;
+      }
+    }
+
+    // ---- move & collide ----
+    var wasOnGround = p.onGround;
+    moveX(p, dt, solids);
+    moveY(p, dt, solids);
+
+    // ---- bouncy ----
+    if (f.bouncy && p.onGround && !wasOnGround) {
+      p.vy = -15 * f.gravityDir;
+      p.onGround = false;
+    }
+
+    // ---- push out of solids (moving platforms) ----
+    pushOut(p, solids);
+
+    // ---- moving platforms ----
+    for (var i = 0; i < solids.length; i++) {
+      var s = solids[i];
+      if (s.moving) {
+        L.state.time = (L.state.time || 0) + dt * 0.016 * s.moving.speed;
+        var t = L.state.time;
+        var oldX = s.x, oldY = s.y;
+        if (s.moving.axis === 'x') s.x = s.originalX + Math.sin(t) * s.moving.range;
+        else s.y = s.originalY + Math.sin(t) * s.moving.range;
+        // carry player if standing on it
+        if (wasOnGround) {
+          var dx = s.x - oldX, dy = s.y - oldY;
+          if (Math.abs((p.y + p.h) - s.y) < 4 && p.x + p.w > s.x && p.x < s.x + s.w) {
+            p.x += dx;
+            p.y += dy;
+          }
+        }
+      }
+    }
+
+    // ---- teleporters ----
+    if (L.teleporters.length && p.teleCooldown <= 0) {
+      for (var ti = 0; ti < L.teleporters.length; ti++) {
+        var tp = L.teleporters[ti];
+        if (aabb(p, tp)) {
+          p.x = tp.toX;
+          p.y = tp.toY;
+          p.vx = 0;
+          p.vy = 0;
+          p.teleCooldown = 25;
+          break;
+        }
+      }
+    }
+
+    // ---- switches ----
+    for (var si = 0; si < L.switches.length; si++) {
+      var sw = L.switches[si];
+      if (!sw.activated && aabb(p, sw)) sw.activated = true;
+    }
+
+    // ---- moving door ----
+    if (f.doorMoving) {
+      L.state.doorTime = (L.state.doorTime || 0) + dt;
+      L.door.x = 450 + Math.sin(L.state.doorTime * 0.018) * 340;
+    }
+
+    // ---- shy door ----
+    if (f.doorFlees > 0) {
+      var d = L.door;
+      var pc = p.x + p.w / 2;
+      var dc = d.x + d.w / 2;
+      var dist = dc - pc;
+      if (Math.abs(dist) < 300) {
+        d.x += sign(dist) * f.doorFlees * dt;
+        d.x = clamp(d.x, 22, W - 22 - d.w);
+      }
+    }
+
+    // ---- out of bounds ----
+    if (p.y > H + 200 || p.y < -200) {
+      respawn();
+      return;
+    }
+
+    // ---- check door ----
+    var unlocked = true;
+    for (var ui = 0; ui < L.switches.length; ui++) {
+      if (!L.switches[ui].activated) { unlocked = false; break; }
+    }
+    if (unlocked && aabb(p, L.door)) {
+      nextLevel();
+    }
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  function roundRect(c, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function drawPlayer(p) {
+    var r = Math.min(p.w, p.h) * 0.28;
+    roundRect(ctx, p.x, p.y, p.w, p.h, r);
+    ctx.fillStyle = '#ffd166';
+    ctx.fill();
+    ctx.strokeStyle = '#b8862a';
+    ctx.lineWidth = Math.max(1.2, p.w * 0.05);
+    ctx.stroke();
+
+    var eyeR = Math.max(1.6, p.w * 0.12);
+    var eyeY = p.y + p.h * 0.36;
+    var look = clamp(p.vx * 0.6, -3, 3);
+    ctx.fillStyle = '#1a1a2a';
+    ctx.beginPath();
+    ctx.arc(p.x + p.w * 0.34 + look, eyeY, eyeR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(p.x + p.w * 0.66 + look, eyeY, eyeR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawDoor(d, t, unlocked) {
+    var pulse = 0.5 + 0.5 * Math.sin(t * 3);
+    ctx.save();
+    ctx.shadowColor = unlocked ? 'rgba(74,222,128,0.9)' : 'rgba(140,140,160,0.6)';
+    ctx.shadowBlur = 14 + pulse * 10;
+    ctx.fillStyle = unlocked ? '#4ade80' : '#5a5a70';
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(8,40,20,0.55)';
+    ctx.fillRect(d.x + 6, d.y + 6, d.w - 12, d.h - 12);
+
+    ctx.fillStyle = unlocked ? '#eafff2' : '#aab';
+    ctx.beginPath();
+    ctx.arc(d.x + d.w - 12, d.y + d.h / 2, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function render() {
+    var L = game.level;
+    if (!L) return;
+    var f = L.flags;
+    var p = L.player;
+    var t = performance.now() / 1000;
+
+    // background
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#171726');
+    bg.addColorStop(1, '#0e0e18');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // grid
+    ctx.strokeStyle = 'rgba(120,140,255,0.05)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var x = 0; x <= W; x += 50) {
+      ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H);
+    }
+    for (var y = 0; y <= H; y += 50) {
+      ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
+
+    // platforms
+    for (var i = 0; i < L.solids.length; i++) {
+      var s = L.solids[i];
+      var alpha = 1;
+      if (s.invisible) {
+        var dx = Math.abs((s.x + s.w / 2) - (p.x + p.w / 2));
+        var dy = Math.abs((s.y + s.h / 2) - (p.y + p.h / 2));
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        alpha = clamp(1 - dist / 380, 0.04, 1);
+        if (alpha < 0.05) continue;
+      }
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = s.moving ? '#2e3a5c' : '#262639';
+      ctx.fillRect(s.x, s.y, s.w, s.h);
+      ctx.fillStyle = s.moving ? '#4a6fae' : '#3d3d5c';
+      ctx.fillRect(s.x, s.y, s.w, 4);
+      ctx.globalAlpha = 1;
+    }
+
+    // switches
+    for (var si = 0; si < L.switches.length; si++) {
+      var sw = L.switches[si];
+      var swColor = sw.activated ? '#4ade80' : '#f87171';
+      ctx.save();
+      ctx.shadowColor = swColor;
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = swColor;
+      roundRect(ctx, sw.x, sw.y, sw.w, sw.h, 4);
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.arc(sw.x + sw.w / 2, sw.y + sw.h / 2, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // teleporters
+    for (var ti = 0; ti < L.teleporters.length; ti++) {
+      var tp = L.teleporters[ti];
+      var pulse = 0.5 + 0.5 * Math.sin(t * 4 + ti);
+      ctx.save();
+      ctx.shadowColor = 'rgba(168,85,247,0.9)';
+      ctx.shadowBlur = 16 + pulse * 12;
+      ctx.strokeStyle = 'rgba(168,85,247,' + (0.5 + pulse * 0.4) + ')';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(tp.x + tp.w / 2, tp.y + tp.h / 2, tp.w / 2, tp.h / 2, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = 'rgba(168,85,247,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(tp.x + tp.w / 2, tp.y + tp.h / 2, tp.w / 2, tp.h / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // door
+    var unlocked = true;
+    for (var ui = 0; ui < L.switches.length; ui++) {
+      if (!L.switches[ui].activated) { unlocked = false; break; }
+    }
+    if (!f.darkness) drawDoor(L.door, t, unlocked);
+
+    // player
+    drawPlayer(p);
+
+    // darkness overlay
+    if (f.darkness) {
+      var cx = p.x + p.w / 2;
+      var cy = p.y + p.h / 2;
+      var radius = 190 + p.w * 2;
+      var g = ctx.createRadialGradient(cx, cy, 30, cx, cy, radius);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(0.5, 'rgba(0,0,0,0.75)');
+      g.addColorStop(1, 'rgba(0,0,0,0.97)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+      drawDoor(L.door, t, unlocked);
+    }
+
+    // fade
+    if (game.fade > 0) {
+      ctx.fillStyle = 'rgba(8,8,15,' + game.fade + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  /* ============================================================
+     MAIN LOOP
+     ============================================================ */
+  var last = performance.now();
+
+  function loop(now) {
+    var dt = (now - last) / 16.6667;
+    last = now;
+    if (dt > 3) dt = 3;
+    if (dt < 0.1) dt = 0.1;
+
+    update(dt);
+    render();
+
+    requestAnimationFrame(loop);
+  }
+
+  /* ============================================================
+     START
+     ============================================================ */
+  loadLevel(0);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
