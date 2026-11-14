@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MIRA VOSS — Composer & Sound Artist</title>
+<meta name="description" content="Mira Voss composes rooms out of frequencies — site-specific sound, film scores and generative instruments." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --paper:#f4efe6;
+  --paper-2:#ece5d8;
+  --ink:#15120e;
+  --muted:#6d675d;
+  --line:rgba(21,18,14,.14);
+  --glass:rgba(255,255,255,.55);
+  --glass-strong:rgba(255,255,255,.72);
+  --lime:#d8ff4a;
+  --blue:#2f4bff;
+  --orange:#ff5a2a;
+  --pink:#ff8fc8;
+  --shadow:0 18px 50px rgba(60,50,30,.13), inset 0 1px 0 rgba(255,255,255,.9);
+  --radius:22px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  color-scheme:light;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:120px}
+body{
+  font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  line-height:1.6;
+  min-height:100vh;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+::selection{background:var(--lime);color:var(--ink)}
+
+/* ============================================================
+   BACKGROUND ART
+============================================================ */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;will-change:transform}
+.b1{width:58vmax;height:58vmax;left:-20vmax;top:-24vmax;background:radial-gradient(circle at 35% 35%,var(--lime),transparent 68%);animation:float1 22s ease-in-out infinite}
+.b2{width:52vmax;height:52vmax;right:-18vmax;top:4vmax;background:radial-gradient(circle at 55% 45%,var(--blue),transparent 66%);opacity:.22;animation:float2 27s ease-in-out infinite}
+.b3{width:46vmax;height:46vmax;left:14vmax;bottom:-24vmax;background:radial-gradient(circle at 50% 50%,var(--orange),transparent 66%);opacity:.2;animation:float3 31s ease-in-out infinite}
+.bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(110% 80% at 50% 30%,transparent 40%,rgba(244,239,230,.75) 100%);
+}
+@keyframes float1{50%{transform:translate3d(5vmax,4vmax,0) scale(1.1)}}
+@keyframes float2{50%{transform:translate3d(-6vmax,5vmax,0) scale(1.06)}}
+@keyframes float3{50%{transform:translate3d(4vmax,-5vmax,0) scale(1.12)}}
+
+.grain{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.09;
+  mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   CURSOR
+============================================================ */
+.cursor,.cursor-dot{position:fixed;top:0;left:0;pointer-events:none;opacity:0;z-index:9999}
+.cursor{
+  width:30px;height:30px;border:1.5px solid var(--ink);border-radius:50%;
+  transition:width .35s var(--ease),height .35s var(--ease),background .35s;
+}
+.cursor.grow{width:58px;height:58px;background:rgba(216,255,74,.45)}
+.cursor-dot{width:5px;height:5px;border-radius:50%;background:var(--ink);z-index:10000}
+@media (hover:hover) and (pointer:fine){
+  body.has-cursor,body.has-cursor a,body.has-cursor button,
+  body.has-cursor .release,body.has-cursor input,body.has-cursor select,
+  body.has-cursor textarea{cursole:none;cursor:none}
+  .cursor,.cursor-dot{opacity:1}
+}
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+.progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:9997;
+  background:linear-gradient(90deg,var(--blue),var(--lime),var(--orange))}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,5vw,48px)}
+.sec{padding:clamp(70px,9vw,120px) 0;position:relative}
+
+/* ============================================================
+   NAV
+============================================================ */
+.nav{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  width:min(1200px,calc(100% - 28px));z-index:200;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 10px 10px 20px;border-radius:999px;
+  background:var(--glass);
+  border:1px solid var(--line);
+  backdrop-filter:blur(18px) saturate(1.4);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  box-shadow:0 12px 34px rgba(60,50,30,.12),inset 0 1px 0 rgba(255,255,255,.9);
+  transition:background .4s,border-color .4s;
+}
+.nav.scrolled{background:var(--glass-strong);border-color:rgba(21,18,14,.2)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.16em;
+  font-size:.82rem;text-transform:uppercase;white-space:nowrap}
+.brand-mark{
+  width:24px;height:24px;flex:none;position:relative;
+  display:grid;place-items:center;
+}
+.brand-mark svg{width:24px;height:24px;animation:spin 12s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none}
+.nav-links a{
+  display:block;padding:9px 15px;border-radius:999px;font-size:.88rem;
+  color:var(--muted);transition:color .3s,background .3s;
+}
+.nav-links a:hover{color:var(--ink);background:rgba(21,18,14,.06)}
+.nav-links a.active{color:var(--ink);background:rgba(21,18,14,.08);font-weight:500}
+
+.burger{display:none;width:42px;height:42px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(255,255,255,.6);align-items:center;justify-content:center;cursor:pointer;
+  flex-direction:column;gap:4px;flex:none}
+.burger span{width:16px;height:1.6px;background:var(--ink);border-radius:2px;transition:.35s var(--ease)}
+.nav.open .burger span:nth-child(1){transform:translateY(5.6px) rotate(45deg)}
+.nav.open .burger span:nth-child(2){opacity:0;transform:scaleX(.2)}
+.nav.open .burger span:nth-child(3){transform:translateY(-5.6px) rotate(-45deg)}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:14px 26px;border-radius:999px;border:1.5px solid var(--ink);
+  font-size:.92rem;font-weight:500;cursor:pointer;position:relative;
+  transform:translate(var(--tx,0px),var(--ty,0px));
+  transition:transform .35s var(--ease),box-shadow .35s,background .35s,color .35s;
+  will-change:transform;white-space:nowrap;
+}
+.btn-primary{
+  background:var(--ink);color:#fff;
+  box-shadow:5px 5px 0 var(--lime);
+}
+.btn-primary:hover{box-shadow:8px 8px 0 var(--lime);transform:translate(calc(var(--tx,0px) - 2px),calc(var(--ty,0px) - 2px))}
+.btn-ghost{
+  background:rgba(255,255,255,.6);color:var(--ink);
+  box-shadow:5px 5px 0 rgba(21,18,14,.16);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.btn-ghost:hover{background:#fff;box-shadow:8px 8px 0 rgba(21,18,14,.2)}
+.btn-sm{padding:10px 20px;font-size:.84rem}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero{padding:clamp(140px,16vw,190px) 0 70px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(32px,5vw,64px);align-items:center}
+
+.pill{
+  display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;
+  background:rgba(255,255,255,.6);border:1px solid var(--line);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:26px;box-shadow:0 6px 20px rgba(60,50,30,.07);
+}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 0 3px rgba(47,75,255,.18);animation:pulse 2.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5;transform:scale(.8)}}
+
+h1{
+  font-size:clamp(3.2rem,9vw,7.6rem);
+  line-height:.88;letter-spacing:-.045em;font-weight:600;
+  text-transform:uppercase;
+}
+h1 .row{display:block}
+h1 em{
+  font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:400;
+  text-transform:none;letter-spacing:-.02em;
+  background:linear-gradient(100deg,var(--blue),var(--orange) 55%,var(--blue));
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 8s linear infinite;
+}
+@keyframes shimmer{to{background-position:220% 0}}
+h1 .period{color:var(--orange)}
+
+.hero p.lead{
+  margin-top:26px;max-width:46ch;color:var(--muted);
+  font-size:clamp(1rem,1.4vw,1.12rem);font-weight:300;line-height:1.8;
+}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+
+.hero-meta{
+  margin-top:38px;display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+  font-size:.78rem;color:var(--muted);letter-spacing:.04em;
+}
+.hero-meta .chip{
+  padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.55);
+  border:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.hero-meta b{color:var(--ink);font-weight:600}
+
+/* hero art */
+.hero-art{position:relative;justify-self:center;width:100%;max-width:420px}
+.cover-frame{
+  position:relative;aspect-ratio:1/1;border-radius:26px;overflow:hidden;
+  border:1.5px solid var(--ink);
+  box-shadow:12px 12px 0 var(--ink);
+  transform:rotate(2.5deg);
+  background:
+    radial-gradient(120% 120% at 18% 12%,#2f4bff,transparent 58%),
+    radial-gradient(110% 110% at 88% 90%,#d8ff4a,transparent 62%),
+    radial-gradient(90% 90% at 60% 40%,#ff5a2a,transparent 60%),
+    #15120e;
+  transition:transform .6s var(--ease);
+}
+.hero-art:hover .cover-frame{transform:rotate(0deg) translateY(-6px)}
+.cover-frame::before{
+  content:'';position:absolute;inset:12%;border-radius:50%;
+  border:1px solid rgba(255,255,255,.5);
+  animation:spin 26s linear infinite;
+}
+.cover-frame::after{
+  content:'';position:absolute;inset:26%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,transparent 55%);
+  opacity:.5;filter:blur(6px);
+}
+.cover-text{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;
+  padding:22px;color:#fff;z-index:2;mix-blend-mode:difference;
+}
+.cover-text small{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase}
+.cover-text strong{
+  font-family:'Fraunces',Georgia,serif;font-weight:400;font-style:italic;
+  font-size:clamp(1.8rem,4vw,2.6rem);line-height:1;letter-spacing:-.02em;
+}
+.sticker{
+  position:absolute;z-index:3;top:-14px;right:-10px;transform:rotate(9deg);
+  background:var(--lime);color:var(--ink);border:1.5px solid var(--ink);
+  border-radius:14px;padding:10px 14px;font-size:.66rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;line-height:1.25;
+  box-shadow:4px 4px 0 var(--ink);
+}
+.sticker small{display:block;font-weight:500;font-size:.58rem;letter-spacing:.18em;opacity:.7}
+.hero-note{
+  position:absolute;z-index:3;left:-16px;bottom:-16px;transform:rotate(-6deg);
+  background:#fff;border:1.5px solid var(--ink);border-radius:14px;
+  padding:9px 13px;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  box-shadow:4px 4px 0 rgba(21,18,14,.2);
+}
+
+/* ============================================================
+   SOUND LAB
+============================================================ */
+.sound-lab{
+  margin-top:clamp(46px,6vw,74px);
+  border-radius:26px;border:1.5px solid var(--ink);
+  background:var(--glass-strong);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  box-shadow:8px 8px 0 rgba(21,18,14,.9),var(--shadow);
+  overflow:hidden;position:relative;
+}
+.sound-lab-head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 22px 12px;flex-wrap:wrap;
+}
+.lab-tag{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;
+  background:var(--ink);color:#fff;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+}
+.lab-tag i{width:6px;height:6px;border-radius:50%;background:var(--lime);display:block;
+  animation:pulse 1.6s ease-in-out infinite}
+.sound-lab h3{font-size:clamp(1rem,2vw,1.24rem);font-weight:500;letter-spacing:-.01em}
+.sound-lab h3 span{color:var(--muted);font-weight:300}
+
+#viz{
+  display:block;width:100%;height:90px;
+  border-top:1px solid rgba(21,18,14,.1);
+  border-bottom:1px solid rgba(21,18,14,.1);
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.18));
+}
+.sound-controls{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:16px 22px;flex-wrap:wrap;
+}
+.sound-controls small{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.eq-icon{display:inline-flex;align-items:flex-end;gap:2px;height:14px}
+.eq-icon i{display:block;width:2.5px;background:currentColor;border-radius:2px;
+  height:6px;transition:height .25s}
+.eq-icon i:nth-child(2){height:11px}
+.eq-icon i:nth-child(3){height:8px}
+.playing .eq-icon i:nth-child(1){animation:eq .7s ease-in-out infinite}
+.playing .eq-icon i:nth-child(2){animation:eq .9s ease-in-out infinite .1s}
+.playing .eq-icon i:nth-child(3){animation:eq .6s ease-in-out infinite .2s}
+@keyframes eq{50%{height:14px}}
+
+/* ============================================================
+   MARQUEE
+============================================================ */
+.marquee{
+  overflow:hidden;background:var(--ink);color:var(--paper);
+  padding:16px 0;transform:rotate(-1.2deg) scale(1.02);
+  border-top:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);
+  margin:10px 0;
+}
+.marquee-track{display:flex;width:max-content;animation:scroll 32s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-track span{
+  display:flex;align-items:center;gap:2rem;padding-right:2rem;white-space:nowrap;
+  font-size:clamp(.9rem,1.8vw,1.3rem);letter-spacing:.2em;text-transform:uppercase;
+  font-weight:300;
+}
+.marquee-track b{color:var(--lime);font-weight:400;font-size:.8em}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* ============================================================
+   HEADINGS / REVEAL
+============================================================ */
+.eyebrow{
+  display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  font-size:.68rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted);
+}
+.eyebrow::before{content:'';width:30px;height:1.5px;background:var(--orange)}
+h2{font-size:clamp(2rem,5vw,3.7rem);line-height:1.02;letter-spacing:-.035em;font-weight:600}
+h2 em{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:400;
+  letter-spacing:-.01em}
+h2 .mark{background:linear-gradient(180deg,transparent 62%,var(--lime) 62%,var(--lime) 92%,transparent 92%)}
+h3{font-size:clamp(1.1rem,2vw,1.35rem);font-weight:500;letter-spacing:-.01em}
+
+.js .reveal{opacity:0;transform:translateY(28px);
+  transition:opacity .9s var(--ease),transform .9s var(--ease);
+  transition-delay:var(--d,0s)}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ============================================================
+   ABOUT
+============================================================ */
+.about-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(34px,5vw,70px);align-items:start}
+.quote{
+  font-family:'Fraunces',Georgia,serif;font-size:clamp(1.6rem,3.4vw,2.7rem);
+  line-height:1.18;letter-spacing:-.02em;font-weight:400;
+  margin:22px 0 26px;max-width:16ch;
+}
+.quote .hi{background:var(--lime);padding:0 .12em;border-radius:4px}
+.about-text p{color:var(--muted);font-weight:300;line-height:1.85;margin-top:16px;max-width:50ch}
+.signature{display:flex;align-items:center;gap:14px;margin-top:32px}
+.avatar{
+  width:44px;height:44px;border-radius:50%;flex:none;border:1.5px solid var(--ink);
+  background:radial-gradient(circle at 34% 30%,var(--lime),var(--blue) 70%);
+}
+.signature small{display:block;color:var(--muted);font-size:.76rem;letter-spacing:.08em}
+.signature strong{font-weight:600;font-size:.92rem}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{
+  padding:24px 20px;border-radius:18px;
+  background:rgba(255,255,255,.55);border:1px solid var(--line);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 10px 30px rgba(60,50,30,.08),inset 0 1px 0 #fff;
+  transition:transform .5s var(--ease),box-shadow .5s,background .5s;
+}
+.stat:hover{transform:translateY(-5px);background:#fff;box-shadow:0 18px 40px rgba(60,50,30,.12),inset 0 1px 0 #fff}
+.stat b{
+  display:block;font-family:'Fraunces',Georgia,serif;font-weight:400;
+  font-size:clamp(1.9rem,4vw,2.8rem);line-height:1;letter-spacing:-.03em;
+}
+.stat small{display:block;margin-top:8px;font-size:.66rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted)}
+
+/* ============================================================
+   DISCOGRAPHY
+============================================================ */
+.work-grid{display:grid;grid-template-columns:1fr .9fr;gap:clamp(30px,5vw,64px);align-items:start;margin-top:44px}
+.release-list{display:flex;flex-direction:column}
+.release{
+  display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:16px;
+  width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);
+  padding:20px 6px;cursor:pointer;transition:background .35s,padding .35s,border-color .35s;
+  border-radius:10px;
+}
+.release:hover,.release:focus-visible{
+  background:var(--ink);color:var(--paper);padding-left:18px;padding-right:18px;
+  outline:none;border-color:var(--ink);
+}
+.release .idx{
+  font-family:'Fraunces',Georgia,serif;font-size:1rem;color:var(--muted);
+  transition:color .35s;
+}
+.release:hover .idx,.release:focus-visible .idx{color:var(--lime)}
+.release .r-title{display:block;font-size:1.05rem;font-weight:500;letter-spacing:-.01em}
+.release .r-meta{display:block;font-size:.75rem;color:var(--muted);margin-top:3px;
+  letter-spacing:.06em;transition:color .35s}
+.release:hover .r-meta,.release:focus-visible .r-meta{color:rgba(244,239,230,.65)}
+.release .arrow{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--line);transition:.35s;flex:none;
+}
+.release:hover .arrow,.release:focus-visible .arrow{
+  background:var(--lime);border-color:var(--lime);color:var(--ink);transform:rotate(-45deg);
+}
+.release .arrow svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.cover-wrap{position:sticky;top:110px}
+.cover-big{
+  --c1:#2f4bff;--c2:#d8ff4a;
+  position:relative;aspect-ratio:1/1;border-radius:24px;overflow:hidden;
+  border:1.5px solid var(--ink);box-shadow:10px 10px 0 var(--ink);
+  background:
+    radial-gradient(120% 120% at 18% 10%,var(--c1),transparent 58%),
+    radial-gradient(110% 110% at 88% 92%,var(--c2),transparent 62%),
+    #15120e;
+  transition:background .5s;
+}
+.cover-big.pulse{animation:coverPulse .55s var(--ease)}
+@keyframes coverPulse{0%{transform:scale(.985)}100%{transform:scale(1)}}
+.cover-big::before{
+  content:'';position:absolute;inset:14%;border-radius:50%;
+  border:1px solid rgba(255,255,255,.45);
+  animation:spin 30s linear infinite;
+}
+.cover-big::after{
+  content:'';position:absolute;inset:30%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,transparent 58%);
+  opacity:.45;filter:blur(8px);
+}
+.cover-inner{
+  position:absolute;inset:0;z-index:2;padding:24px;color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;
+  mix-blend-mode:difference;
+}
+.cover-inner .top{display:flex;justify-content:space-between;align-items:flex-start;
+  font-size:.64rem;letter-spacing:.22em;text-transform:uppercase}
+.cover-inner .big-index{
+  font-family:'Fraunces',Georgia,serif;font-size:clamp(4rem,10vw,7rem);
+  line-height:.8;font-weight:400;opacity:.9;
+}
+.cover-inner .bottom small{font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;opacity:.8}
+.cover-inner .bottom strong{
+  display:block;font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:400;
+  font-size:clamp(1.5rem,3.2vw,2.2rem);line-height:1.05;letter-spacing:-.02em;margin-top:4px;
+}
+.hint{
+  margin-top:14px;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);text-align:center;
+}
+
+/* ============================================================
+   LIVE
+============================================================ */
+.live-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;
+  flex-wrap:wrap;margin-bottom:36px}
+.tour{display:flex;flex-direction:column;border-top:1.5px solid var(--ink)}
+.tour-row{
+  display:grid;grid-template-columns:110px 1fr 1fr auto auto;align-items:center;gap:18px;
+  padding:20px 10px;border-bottom:1px solid var(--line);
+  transition:background .35s,color .35s,padding .35s,border-color .35s;
+  border-radius:8px;position:relative;
+}
+.tour-row:hover{background:var(--ink);color:var(--paper);padding-left:20px;padding-right:20px;
+  border-color:var(--ink)}
+.date-box{display:flex;flex-direction:column;line-height:1.1}
+.date-box b{font-size:1.02rem;font-weight:600}
+.date-box span{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+  margin-top:4px;transition:color .35s}
+.tour-row:hover .date-box span{color:rgba(244,239,230,.6)}
+.city{font-size:1rem;font-weight:500}
+.venue{font-size:.84rem;color:var(--muted);transition:color .35s}
+.tour-row:hover .venue{color:rgba(244,239,230,.7)}
+.status{
+  font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:6px 11px;border-radius:999px;border:1px solid var(--line);
+  color:var(--muted);white-space:nowrap;transition:.35s;
+}
+.tour-row:hover .status{border-color:rgba(244,239,230,.3);color:var(--paper)}
+.status.hot{border-color:var(--orange);color:var(--orange)}
+.tour-row:hover .status.hot{background:var(--orange);color:var(--ink);border-color:var(--orange)}
+.status.sold{opacity:.55}
+.tour-row .btn{padding:9px 18px;font-size:.78rem;box-shadow:3px 3px 0 rgba(21,18,14,.2)}
+.tour-row:hover .btn{background:var(--lime);border-color:var(--lime);color:var(--ink);box-shadow:3px 3px 0 rgba(244,239,230,.3)}
+
+/* ============================================================
+   CONTACT
+============================================================ */
+.contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(32px,5vw,64px);align-items:start}
+.contact-info p{color:var(--muted);font-weight:300;line-height:1.85;margin-top:20px;max-width:40ch}
+.contact-lines{margin-top:30px;display:grid;gap:14px}
+.contact-line{display:flex;align-items:center;gap:12px;font-size:.92rem}
+.contact-line .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex:none}
+.contact-line a{border-bottom:1px solid transparent;transition:border-color .3s}
+.contact-line a:hover{border-color:var(--ink)}
+
+.form-card{
+  padding:clamp(24px,3.6vw,36px);border-radius:24px;
+  background:var(--glass-strong);border:1.5px solid var(--ink);
+  backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  box-shadow:8px 8px 0 rgba(21,18,14,.9),var(--shadow);
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.field{display:flex;flex-direction:column;gap:7px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 15px;border-radius:12px;color:var(--ink);
+  background:rgba(255,255,255,.65);border:1px solid rgba(21,18,14,.18);
+  outline:none;transition:border-color .3s,background .3s,box-shadow .3s;
+  font-size:.9rem;
+}
+.field textarea{resize:vertical;min-height:92px}
+.field input::placeholder,.field textarea::placeholder{color:rgba(21,18,14,.35)}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--blue);background:#fff;
+  box-shadow:0 0 0 4px rgba(47,75,255,.12);
+}
+.field select option{background:#fff;color:var(--ink)}
+.form-card .btn{width:100%;margin-top:18px}
+.form-note{margin-top:12px;font-size:.7rem;color:var(--muted);text-align:center;letter-spacing:.04em}
+
+/* ============================================================
+   TOAST
+============================================================ */
+.toast{
+  position:fixed;left:50%;bottom:30px;transform:translate(-50%,150%);
+  padding:15px 24px;border-radius:999px;z-index:9996;
+  background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);
+  box-shadow:5px 5px 0 var(--lime),0 18px 50px rgba(0,0,0,.25);
+  font-size:.86rem;display:flex;align-items:center;gap:11px;
+  transition:transform .55s var(--ease);white-space:nowrap;
+}
+.toast.show{transform:translate(-50%,0)}
+.toast .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);flex:none}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer{border-top:1.5px solid var(--ink);padding:clamp(48px,6vw,76px) 0 30px;margin-top:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),transparent)}
+.foot-top{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap}
+.foot-brand p{color:var(--muted);font-size:.88rem;font-weight:300;margin-top:14px;max-width:30ch;line-height:1.8}
+.foot-links{display:flex;gap:clamp(24px,4vw,56px);flex-wrap:wrap}
+.foot-col h5{font-size:.64rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:14px;font-weight:500}
+.foot-col a,.foot-col span{display:block;font-size:.88rem;color:var(--ink);margin-bottom:9px;
+  transition:color .3s,transform .3s}
+.foot-col a:hover{color:var(--blue);transform:translateX(3px)}
+.big-word{
+  font-size:clamp(3.4rem,15vw,12rem);line-height:.78;letter-spacing:-.05em;font-weight:600;
+  text-transform:uppercase;margin-top:clamp(44px,6vw,70px);
+  color:transparent;-webkit-text-stroke:1.5px rgba(21,18,14,.32);
+  white-space:nowrap;overflow:hidden;user-select:none;
+}
+.foot-bottom{
+  margin-top:24px;padding-top:22px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-size:.72rem;color:var(--muted);letter-spacing:.06em;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:44px}
+  .hero-art{max-width:380px;justify-self:start}
+  .about-grid,.work-grid,.contact-grid{grid-template-columns:1fr;gap:40px}
+  .cover-wrap{position:static;order:-1}
+  .cover-big{aspect-ratio:1.7/1;max-height:340px}
+  .cover-big::before{inset:8%}
+  .cover-big::after{inset:22%}
+  .cover-inner{flex-direction:row;align-items:flex-end;gap:20px}
+  .cover-inner .big-index{font-size:clamp(3rem,9vw,5rem)}
+  .cover-inner .top{flex-direction:column;gap:4px}
+}
+@media (max-width:900px){
+  .nav{padding:9px 9px 9px 16px}
+  .nav-links{
+    position:absolute;top:calc(100% + 10px);left:0;right:0;
+    flex-direction:column;align-items:stretch;gap:4px;padding:12px;
+    background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:24px;
+    backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);
+    box-shadow:0 24px 60px rgba(60,50,30,.2);
+    opacity:0;visibility:hidden;transform:translateY(-10px) scale(.98);
+    transition:opacity .4s var(--ease),transform .4s var(--ease),visibility .4s;
+  }
+  .nav.open .nav-links{opacity:1;visibility:visible;transform:none}
+  .nav-links a{padding:14px 18px;font-size:.95rem}
+  .burger{display:flex}
+  .nav > .btn-sm{display:none}
+  .tour-row{grid-template-columns:90px 1fr auto;gap:12px}
+  .tour-row .venue{display:none}
+  .tour-row .status{grid-column:2;justify-self:start;margin-top:4px}
+  .tour-row .btn{grid-column:3;grid-row:1/3;align-self:center}
+}
+@media (max-width:620px){
+  h1{font-size:clamp(2.9rem,15vw,4.4rem)}
+  .hero{padding-top:128px}
+  .form-grid{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .hero-meta{gap:8px}
+  .hero-meta .chip{font-size:.7rem;padding:6px 11px}
+  .cover-big{aspect-ratio:1.35/1}
+  .cover-inner{flex-direction:column;align-items:flex-start;justify-content:space-between}
+  .tour-row{grid-template-columns:78px 1fr;gap:10px}
+  .tour-row .btn{grid-column:2;grid-row:2;justify-self:start;margin-top:6px}
+  .tour-row .status{grid-column:2;grid-row:3}
+  .big-word{-webkit-text-stroke-width:1.2px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;
+    transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="bg" aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- CURSOR -->
+<div class="cursor" aria-hidden="true"></div>
+<div class="cursor-dot" aria-hidden="true"></div>
+
+<!-- PROGRESS -->
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <a href="#home" class="brand" aria-label="Mira Voss home">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/>
+      </svg>
+    </span>
+    Mira Voss
+  </a>
+
+  <nav>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#live">Live</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <a href="#contact" class="btn btn-primary btn-sm magnetic">Book</a>
+  <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <div class="pill reveal">
+            <span class="dot"></span> Composer · Sound artist · Berlin
+          </div>
+
+          <h1 class="reveal" style="--d:.06s">
+            <span class="row">Sound</span>
+            <span class="row"><em>as</em> matter<span class="period">.</span></span>
+          </h1>
+
+          <p class="lead reveal" style="--d:.14s">
+            I compose rooms out of frequencies — site-specific sound, film scores
+            and generative instruments that turn air into architecture.
+          </p>
+
+          <div class="hero-actions reveal" style="--d:.2s">
+            <a href="#sound-lab" class="btn btn-primary magnetic">Listen in</a>
+            <a href="#live" class="btn btn-ghost magnetic">See live dates</a>
+          </div>
+
+          <div class="hero-meta reveal" style="--d:.28s">
+            <span class="chip">New EP · <b>Glass Hours</b></span>
+            <span class="chip"><b>12.4M</b> streams</span>
+            <span class="chip"><b>2026</b> tour</span>
+          </div>
+        </div>
+
+        <div class="hero-art reveal" style="--d:.16s">
+          <div class="cover-frame" aria-label="Glass Hours EP cover art">
+            <div class="cover-text">
+              <small>Mira Voss · 2025</small>
+              <strong>Glass<br>Hours</strong>
+              <small>EP · 6 tracks · 24 min</small>
+            </div>
+          </div>
+          <div class="sticker">New EP<small>Out now</small></div>
+          <div class="hero-note">Field recordings · Berlin</div>
+        </div>
+      </div>
+
+      <!-- SOUND LAB -->
+      <div class="sound-lab reveal" id="sound-lab" style="--d:.1s">
+        <div class="sound-lab-head">
+          <span class="lab-tag"><i></i> Live generator</span>
+          <h3>Press play to enter the room <span>— generative, never twice the same</span></h3>
+        </div>
+
+        <canvas id="viz" aria-label="Audio visualiser" role="img"></canvas>
+
+        <div class="sound-controls">
+          <button class="btn btn-primary" id="audioBtn" type="button">
+            <span class="eq-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span id="audioLabel">Play ambient</span>
+          </button>
+          <small>Generated in your browser · headphones recommended</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Film scores <b>✦</b> Installations <b>✦</b> Modular synth <b>✦</b> Field recording <b>✦</b> Live A/V <b>✦</b></span>
+      <span>Film scores <b>✦</b> Installations <b>✦</b> Modular synth <b>✦</b> Field recording <b>✦</b> Live A/V <b>✦</b></span>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section class="sec" id="about">
+    <div class="wrap about-grid">
+      <div class="about-text">
+        <div class="eyebrow reveal">01 — About</div>
+        <h2 class="quote reveal" style="--d:.06s">
+          A speaker is a door. I just decide <span class="hi">where it opens</span>.
+        </h2>
+        <p class="reveal" style="--d:.12s">
+          Mira Voss is a composer and sound artist working between score, installation
+          and generative systems. Her practice begins with a room — its resonance,
+          its history, the way people move through it — and builds sound that makes
+          that room audible.
+        </p>
+        <p class="reveal" style="--d:.18s">
+          Recent work includes scores for documentary and dance, a permanent
+          sound installation in Copenhagen's harbour, and the ongoing
+          <em>Field Notes</em> series of site-specific recordings.
+        </p>
+
+        <div class="signature reveal" style="--d:.24s">
+          <span class="avatar" aria-hidden="true"></span>
+          <div>
+            <strong>Mira Voss</strong>
+            <small>Composer · Berlin / Copenhagen</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat reveal"><b data-count="6">0</b><small>Albums &amp; EPs</small></div>
+        <div class="stat reveal" style="--d:.07s"><b data-count="42">0</b><small>Scores</small></div>
+        <div class="stat reveal" style="--d:.14s"><b data-count="18">0</b><small>Countries</small></div>
+        <div class="stat reveal" style="--d:.21s"><b data-count="12">0</b><small>Years</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="sec" id="work">
+    <div class="wrap">
+      <div class="eyebrow reveal">02 — Selected work</div>
+      <h2 class="reveal" style="--d:.06s">
+        Records that behave <span class="mark">like rooms</span>.
+      </h2>
+
+      <div class="work-grid">
+        <div class="release-list reveal" style="--d:.1s">
+          <button class="release" type="button" data-title="Glass Hours" data-year="2025" data-tag="EP · 6 tracks" data-index="01" data-c1="#2f4bff" data-c2="#d8ff4a">
+            <span class="idx">01</span>
+            <span><span class="r-title">Glass Hours</span><span class="r-meta">2025 · EP</span></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </button>
+
+          <button class="release" type="button" data-title="Soft Machinery" data-year="2024" data-tag="Album · 9 tracks" data-index="02" data-c1="#ff5a2a" data-c2="#ff8fc8">
+            <span class="idx">02</span>
+            <span><span class="r-title">Soft Machinery</span><span class="r-meta">2024 · Album</span></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </button>
+
+          <button class="release" type="button" data-title="Field Notes: Baltic" data-year="2023" data-tag="Album · 11 tracks" data-index="03" data-c1="#15120e" data-c2="#2f4bff">
+            <span class="idx">03</span>
+            <span><span class="r-title">Field Notes: Baltic</span><span class="r-meta">2023 · Album</span></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </button>
+
+          <button class="release" type="button" data-title="Interiors" data-year="2022" data-tag="EP · 5 tracks" data-index="04" data-c1="#d8ff4a" data-c2="#2f4bff">
+            <span class="idx">04</span>
+            <span><span class="r-title">Interiors</span><span class="r-meta">2022 · EP</span></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </button>
+
+          <button class="release" type="button" data-title="The Long Room" data-year="2020" data-tag="Score · 14 tracks" data-index="05" data-c1="#ff8fc8" data-c2="#ff5a2a">
+            <span class="idx">05</span>
+            <span><span class="r-title">The Long Room</span><span class="r-meta">2020 · Score</span></span>
+            <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+          </button>
+        </div>
+
+        <div class="cover-wrap reveal" style="--d:.16s">
+          <div class="cover-big" id="coverBig" aria-live="polite">
+            <div class="cover-inner">
+              <div class="top">
+                <span id="coverTag">EP · 6 tracks</span>
+                <span>Mira Voss</span>
+              </div>
+              <div class="big-index" id="coverIndex">01</div>
+              <div class="bottom">
+                <small id="coverYear">2025</small>
+                <strong id="coverTitle">Glass Hours</strong>
+              </div>
+            </div>
+          </div>
+          <p class="hint">Hover a release to inspect the sleeve</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE -->
+  <section class="sec" id="live">
+    <div class="wrap">
+      <div class="live-head">
+        <div>
+          <div class="eyebrow reveal">03 — Live</div>
+          <h2 class="reveal" style="--d:.06s">Rooms, <em>in person</em>.</h2>
+        </div>
+        <a href="#contact" class="btn btn-ghost btn-sm magnetic reveal" style="--d:.12s">Booking enquiries</a>
+      </div>
+
+      <div class="tour reveal" style="--d:.1s">
+        <div class="tour-row">
+          <div class="date-box"><b>14.03.26</b><span>Berlin</span></div>
+          <div class="city">Silent Green</div>
+          <div class="venue">A/V premiere · 20:00</div>
+          <span class="status hot">Low tickets</span>
+          <a href="#contact" class="btn btn-ghost">Tickets</a>
+        </div>
+
+        <div class="tour-row">
+          <div class="date-box"><b>21.03.26</b><span>Paris</span></div>
+          <div class="city">La Gaîté Lyrique</div>
+          <div class="venue">Live set · 20:30</div>
+          <span class="status">On sale</span>
+          <a href="#contact" class="btn btn-ghost">Tickets</a>
+        </div>
+
+        <div class="tour-row">
+          <div class="date-box"><b>04.04.26</b><span>London</span></div>
+          <div class="city">Village Underground</div>
+          <div class="venue">Live set · 19:30</div>
+          <span class="status sold">Sold out</span>
+          <a href="#contact" class="btn btn-ghost">Waitlist</a>
+        </div>
+
+        <div class="tour-row">
+          <div class="date-box"><b>18.04.26</b><span>Amsterdam</span></div>
+          <div class="city">Muziekgebouw</div>
+          <div class="venue">Quadraphonic · 20:00</div>
+          <span class="status">On sale</span>
+          <a href="#contact" class="btn btn-ghost">Tickets</a>
+        </div>
+
+        <div class="tour-row">
+          <div class="date-box"><b>02.05.26</b><span>Copenhagen</span></div>
+          <div class="city">Vega</div>
+          <div class="venue">Album release · 21:00</div>
+          <span class="status hot">Low tickets</span>
+          <a href="#contact" class="btn btn-ghost">Tickets</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="sec" id="contact">
+    <div class="wrap contact-grid">
+      <div class="contact-info">
+        <div class="eyebrow reveal">04 — Contact</div>
+        <h2 class="reveal" style="--d:.06s">Let's make a <em>room</em>.</h2>
+        <p class="reveal" style="--d:.12s">
+          Available for commissions, scores, installations and selected live
+          collaborations. Tell me about the space, the people, and what should
+          happen inside it.
+        </p>
+
+        <div class="contact-lines reveal" style="--d:.18s">
+          <div class="contact-line"><span class="dot"></span> <a href="mailto:hello@miravoss.audio">hello@miravoss.audio</a></div>
+          <div class="contact-line"><span class="dot"></span> <a href="#">@miravoss.sound</a></div>
+          <div class="contact-line"><span class="dot"></span> Berlin · Copenhagen</div>
+        </div>
+      </div>
+
+      <form class="form-card reveal" id="contactForm" style="--d:.1s" novalidate>
+        <h3>Start a conversation</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@studio.com" required>
+          </div>
+          <div class="field full">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject">
+              <option>Commission / score</option>
+              <option>Installation</option>
+              <option>Live collaboration</option>
+              <option>Press &amp; interviews</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Tell me about the room, the project, the timing…" required></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary magnetic">Send message</button>
+        <p class="form-note">Usually replies within 3 working days</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#home" class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1"/>
+            </svg>
+          </span>
+          Mira Voss
+        </a>
+        <p>Composer and sound artist. Rooms, records and generative instruments.</p>
+      </div>
+
+      <div class="foot-links">
+        <div class="foot-col">
+          <h5>Explore</h5>
+          <a href="#work">Work</a>
+          <a href="#live">Live</a>
+          <a href="#about">About</a>
+        </div>
+        <div class="foot-col">
+          <h5>Elsewhere</h5>
+          <a href="#">Bandcamp</a>
+          <a href="#">Instagram</a>
+          <a href="#">Spotify</a>
+        </div>
+        <div class="foot-col">
+          <h5>Contact</h5>
+          <a href="mailto:hello@miravoss.audio">Email</a>
+          <a href="#contact">Booking</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="big-word" aria-hidden="true">MIRA VOSS</div>
+
+    <div class="foot-bottom">
+      <span>© 2026 Mira Voss · All rights reserved</span>
+      <span>Demo site — design &amp; code</span>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="dot"></span> Message sent — thank you. I'll be in touch soon.
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- SCROLL PROGRESS ---------- */
+  const progress = document.getElementById('progress');
+  const nav = document.getElementById('nav');
+  function onScroll() {
+    const h = document.documentElement;
+    const max = h.scrollHeight - h.clientHeight;
+    progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+    nav.classList.toggle('scrolled', h.scrollTop > 40);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- REVEAL ---------- */
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('in'));
+  }
+
+  /* ---------- ACTIVE NAV ---------- */
+  const sections = [...document.querySelectorAll('section[id]')];
+  const navAnchors = [...document.querySelectorAll('.nav-links a')];
+  if ('IntersectionObserver' in window) {
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          navAnchors.forEach((a) =>
+            a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id)
+          );
+        }
+      });
+    }, { threshold: 0.25, rootMargin: '-20% 0px -55% 0px' });
+    sections.forEach((s) => spy.observe(s));
+  }
+
+  /* ---------- MOBILE NAV ---------- */
+  const burger = document.getElementById('burger');
+  burger.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open);
+  });
+  document.querySelectorAll('.nav-links a').forEach((a) =>
+    a.addEventListener('click', () => {
+      nav.classList.remove('open');
+      burger.setAttribute('aria-expanded', false);
+    })
+  );
+
+  /* ---------- CUSTOM CURSOR ---------- */
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (fine && !reduce) {
+    document.body.classList.add('has-cursor');
+    const ring = document.querySelector('.cursor');
+    const dot = document.querySelector('.cursor-dot');
+    let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+    let rx = mx, ry = my;
+
+    window.addEventListener('mousemove', (e) => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+    }, { passive: true });
+
+    (function loop() {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    })();
+
+    const hoverables = document.querySelectorAll(
+      'a, button, .release, input, select, textarea, .stat, .tour-row'
+    );
+    hoverables.forEach((el) => {
+      el.addEventListener('mouseenter', () => ring.classList.add('grow'));
+      el.addEventListener('mouseleave', () => ring.classList.remove('grow'));
+    });
+  }
+
+  /* ---------- MAGNETIC BUTTONS ---------- */
+  if (fine && !reduce) {
+    document.querySelectorAll('.magnetic').forEach((el) => {
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width / 2) * 0.2;
+        const y = (e.clientY - r.top - r.height / 2) * 0.26;
+        el.style.setProperty('--tx', x.toFixed(2) + 'px');
+        el.style.setProperty('--ty', y.toFixed(2) + 'px');
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.setProperty('--tx', '0px');
+        el.style.setProperty('--ty', '0px');
+      });
+    });
+  }
+
+  /* ---------- PARALLAX BLOBS ---------- */
+  if (fine && !reduce) {
+    const blobs = document.querySelectorAll('.blob');
+    let px = 0, py = 0, tx = 0, ty = 0;
+    window.addEventListener('mousemove', (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+    }, { passive: true });
+    (function parallax() {
+      px += (tx - px) * 0.05;
+      py += (ty - py) * 0.05;
+      blobs.forEach((b, i) => {
+        const depth = (i + 1) * 8;
+        b.style.translate = `${px * depth}px ${py * depth}px`;
+      });
+      requestAnimationFrame(parallax);
+    })();
+  }
+
+  /* ---------- DISCOGRAPHY COVER ---------- */
+  const releases = [...document.querySelectorAll('.release')];
+  const cover = document.getElementById('coverBig');
+  const coverTitle = document.getElementById('coverTitle');
+  const coverYear = document.getElementById('coverYear');
+  const coverTag = document.getElementById('coverTag');
+  const coverIndex = document.getElementById('coverIndex');
+
+  function setCover(el) {
+    const d = el.dataset;
+    cover.style.setProperty('--c1', d.c1);
+    cover.style.setProperty('--c2', d.c2);
+    coverTitle.textContent = d.title;
+    coverYear.textContent = d.year;
+    coverTag.textContent = d.tag;
+    coverIndex.textContent = d.index;
+    cover.classList.remove('pulse');
+    void cover.offsetWidth;
+    cover.classList.add('pulse');
+  }
+
+  releases.forEach((el) => {
+    el.addEventListener('mouseenter', () => setCover(el));
+    el.addEventListener('focus', () => setCover(el));
+    el.addEventListener('click', () => setCover(el));
+  });
+
+  /* ---------- COUNTERS ---------- */
+  const counters = document.querySelectorAll('[data-count]');
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count, 10);
+    const dur = 1400;
+    const start = performance.now();
+    function step(now) {
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased);
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if ('IntersectionObserver' in window && !reduce) {
+    const cio = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          animateCount(e.target);
+          cio.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.6 });
+    counters.forEach((c) => cio.observe(c));
+  } else {
+    counters.forEach((c) => (c.textContent = c.dataset.count));
+  }
+
+  /* ---------- AUDIO + VISUALISER ---------- */
+  const canvas = document.getElementById('viz');
+  const audioBtn = document.getElementById('audioBtn');
+  const audioLabel = document.getElementById('audioLabel');
+  const ctx2d = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  let actx = null;
+  let master = null;
+  let analyser = null;
+  let dataArray = null;
+  let audioOn = false;
+
+  function initAudio() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    actx = new AC();
+
+    master = actx.createGain();
+    master.gain.value = 0;
+
+    analyser = actx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.82;
+    dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    master.connect(analyser);
+    analyser.connect(actx.destination);
+
+    /* spacious delay */
+    const delay = actx.createDelay(1);
+    delay.delayTime.value = 0.42;
+    const feedback = actx.createGain();
+    feedback.gain.value = 0.32;
+    const wet = actx.createGain();
+    wet.gain.value = 0.32;
+    delay.connect(feedback);
+    feedback.connect(delay);
+    master.connect(delay);
+    delay.connect(wet);
+    wet.connect(actx.destination);
+
+    /* slow-moving lowpass */
+    const filter = actx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 820;
+    filter.Q.value = 0.8;
+    filter.connect(master);
+
+    const lfo = actx.createOscillator();
+    lfo.frequency.value = 0.06;
+    const lfoGain = actx.createGain();
+    lfoGain.gain.value = 380;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+
+    /* chord */
+    const freqs = [110, 164.81, 220, 329.63];
+    freqs.forEach((f, i) => {
+      const osc = actx.createOscillator();
+      osc.type = i % 2 ? 'triangle' : 'sine';
+      osc.frequency.value = f;
+      osc.detune.value = (i - 1.5) * 5;
+
+      const g = actx.createGain();
+      g.gain.value = 0.14 / (i + 1);
+
+      osc.connect(g);
+      g.connect(filter);
+      osc.start();
+    });
+
+    return true;
+  }
+
+  function toggleAudio() {
+    if (!actx) {
+      if (!initAudio()) {
+        audioLabel.textContent = 'Audio unavailable';
+        return;
+      }
+    }
+    if (actx.state === 'suspended') actx.resume();
+
+    audioOn = !audioOn;
+    const now = actx.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(master.gain.value, now);
+    master.gain.linearRampToValueAtTime(audioOn ? 0.13 : 0, now + 0.9);
+
+    audioBtn.classList.toggle('playing', audioOn);
+    audioLabel.textContent = audioOn ? 'Stop ambient' : 'Play ambient';
+  }
+
+  audioBtn.addEventListener('click', toggleAudio);
+
+  /* visualiser */
+  const palette = ['#2f4bff', '#d8ff4a', '#ff5a2a', '#ff8fc8'];
+
+  function sizeCanvas() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+    }
+    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { w, h };
+  }
+
+  function draw(now) {
+    const { w, h } = sizeCanvas();
+    ctx2d.clearRect(0, 0, w, h);
+
+    const bars = w < 500 ? 32 : 56;
+    const gap = 3;
+    const bw = (w - (bars - 1) * gap) / bars;
+    const mid = h * 0.58;
+
+    if (analyser && audioOn) {
+      analyser.getByteFrequencyData(dataArray);
+    }
+
+    for (let i = 0; i < bars; i++) {
+      let v;
+      if (analyser && audioOn) {
+        const bin = Math.floor((i / bars) * (dataArray.length * 0.55));
+        v = (dataArray[bin] || 0) / 255;
+        v = Math.pow(v, 1.15);
+      } else {
+        v = 0.1 + 0.08 * Math.sin(now * 0.0011 + i * 0.45);
+      }
+
+      const bh = Math.max(2, v * h * 0.86);
+      const x = i * (bw + gap);
+      const y = mid - bh / 2;
+
+      ctx2d.fillStyle = palette[i % palette.length];
+      ctx2d.globalAlpha = audioOn ? 0.85 : 0.35;
+      ctx2d.beginPath();
+      const r = Math.min(bw / 2, 3);
+      ctx2d.roundRect(x, y, bw, bh, r);
+      ctx2d.fill();
+    }
+
+    ctx2d.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  if (!reduce) {
+    requestAnimationFrame(draw);
+  } else {
+    /* static frame for reduced motion */
+    sizeCanvas();
+    ctx2d.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+  }
+
+  /* ---------- CONTACT FORM ---------- */
+  const form = document.getElementById('contactForm');
+  const toast = document.getElementById('toast');
+  let toastTimer;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = form.querySelector('#name');
+    const email = form.querySelector('#email');
+    const message = form.querySelector('#message');
+    let ok = true;
+
+    [name, email, message].forEach((field) => {
+      const valid =
+        field.checkValidity() && field.value.trim() !== '';
+      field.style.borderColor = valid ? '' : 'rgba(255,90,42,.85)';
+      if (!valid) ok = false;
+    });
+
+    if (!ok) return;
+
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 4200);
+    form.reset();
+    form.querySelectorAll('input, textarea').forEach((i) => (i.style.borderColor = ''));
+  });
+
+  /* ---------- SMOOTH ANCHORS ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('href');
+      if (id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DEADCHANNEL — Independent Game Studio</title>
+<meta name="description" content="DEADCHANNEL is an independent game studio in Berlin making small games about big feelings." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@300;400;500&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --bg:#07080a;
+  --panel:#0b0f0d;
+  --panel-2:#0f1512;
+  --ink:#c9f5d6;
+  --dim:#7a9e88;
+  --green:#3dff8a;
+  --green-soft:#26b862;
+  --amber:#ffb700;
+  --magenta:#ff3d9a;
+  --cyan:#3de1ff;
+  --line:rgba(61,255,138,.14);
+  --line-strong:rgba(61,255,138,.32);
+  --pixel:'VT323',monospace;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --tiny:'Silkscreen',monospace;
+  --ease:cubic-bezier(.22,.68,0,1);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{
+  font-family:var(--mono);
+  background:var(--bg);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  min-height:100vh;
+  position:relative;
+}
+
+/* background atmosphere */
+body::before{
+  content:'';
+  position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(58% 42% at 50% 0%, rgba(61,255,138,.07), transparent 70%),
+    radial-gradient(48% 48% at 8% 100%, rgba(61,225,255,.05), transparent 70%),
+    radial-gradient(46% 46% at 92% 60%, rgba(255,61,154,.045), transparent 70%);
+}
+body::after{
+  content:'';
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:48px 48px;
+  opacity:.32;
+  -webkit-mask-image:radial-gradient(120% 100% at 50% 0%, #000 22%, transparent 82%);
+  mask-image:radial-gradient(120% 100% at 50% 0%, #000 22%, transparent 82%);
+}
+
+/* CRT overlays */
+.scanlines{
+  position:fixed;inset:0;z-index:9990;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.22) 0px,
+    rgba(0,0,0,.22) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity:.55;
+}
+.scanbeam{
+  position:fixed;left:0;right:0;height:140px;z-index:9991;pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(61,255,138,.055), transparent);
+  animation:scanMove 9s linear infinite;
+}
+@keyframes scanMove{
+  from{transform:translateY(-140px)}
+  to{transform:translateY(100vh)}
+}
+.vignette{
+  position:fixed;inset:0;z-index:9989;pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.55) 100%);
+}
+
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+::selection{background:var(--green);color:var(--bg)}
+
+/* ============================================================
+   CURSOR — block cursor + phosphor trail + targeting ring
+============================================================ */
+.cursor{
+  position:fixed;top:0;left:0;
+  z-index:9999;pointer-events:none;
+  transform:translate3d(-100px,-100px,0);
+  will-change:transform;
+}
+.cursor-block{
+  position:absolute;left:0;top:0;
+  transform:translate(-50%,-50%);
+  width:12px;height:20px;
+  background:var(--green);
+  box-shadow:
+    0 0 10px var(--green),
+    0 0 28px rgba(61,255,138,.55);
+  animation:cursorBlink 1.06s step-end infinite;
+  transition:width .28s var(--ease),height .28s var(--ease),
+             background .28s,border-radius .28s,box-shadow .28s;
+}
+@keyframes cursorBlink{
+  0%,55%{opacity:1}
+  56%,100%{opacity:.15}
+}
+.cursor-ring{
+  position:absolute;left:0;top:0;
+  transform:translate(-50%,-50%);
+  width:0;height:0;
+  border:1.5px solid var(--green);
+  border-radius:3px;
+  opacity:0;
+  box-shadow:0 0 20px rgba(61,255,138,.28);
+  transition:width .28s var(--ease),height .28s var(--ease),opacity .28s;
+}
+.cursor.hot .cursor-block{
+  width:6px;height:6px;
+  border-radius:50%;
+  animation:none;opacity:1;
+  box-shadow:
+    0 0 14px var(--green),
+    0 0 34px rgba(61,255,138,.7);
+}
+.cursor.hot .cursor-ring{
+  width:42px;height:42px;opacity:1;
+}
+
+#trail{
+  position:fixed;inset:0;
+  z-index:9997;pointer-events:none;
+}
+.trail-dot{
+  position:absolute;left:0;top:0;
+  width:7px;height:7px;
+  background:var(--green);
+  border-radius:2px;
+  opacity:0;
+  transform:translate3d(-100px,-100px,0) translate(-50%,-50%);
+  filter:blur(.5px);
+  box-shadow:0 0 8px var(--green);
+  will-change:transform;
+  transition:opacity .2s;
+}
+
+@media (hover:hover) and (pointer:fine){
+  body.has-cursor,
+  body.has-cursor a,
+  body.has-cursor button,
+  body.has-cursor input,
+  body.has-cursor select,
+  body.has-cursor textarea,
+  body.has-cursor .game,
+  body.has-cursor .crew-row,
+  body.has-cursor .log-row{cursor:none}
+}
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+.progress{
+  position:fixed;top:0;left:0;height:2px;width:0;z-index:9997;
+  background:var(--green);
+  box-shadow:0 0 12px var(--green);
+}
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;gap:16px;
+  padding:10px clamp(16px,3vw,28px);
+  background:rgba(7,8,10,.82);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:blur(14px) saturate(1.3);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);
+  font-family:var(--mono);
+  font-size:.72rem;
+  color:var(--dim);
+}
+.topbar.scrolled{border-bottom-color:var(--line-strong)}
+.win-dots{display:flex;gap:6px;flex:none}
+.win-dots .d{width:10px;height:10px;border-radius:50%;display:block}
+.d.r{background:#ff5f57}
+.d.a{background:#febc2e}
+.d.g{background:#28c840}
+
+.topbar .path{
+  font-family:var(--tiny);
+  font-size:.6rem;
+  letter-spacing:.08em;
+  color:var(--green);
+  white-space:nowrap;
+  padding:4px 8px;
+  border:1px solid var(--line);
+}
+
+.topnav{
+  display:flex;gap:18px;
+  margin-left:auto;
+  font-family:var(--tiny);
+  font-size:.6rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.topnav a{
+  color:var(--dim);
+  padding:4px 0;
+  position:relative;
+  transition:color .3s;
+}
+.topnav a::before{
+  content:'';
+  position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:var(--green);
+  transform:scaleX(0);
+  transform-origin:right;
+  transition:transform .35s var(--ease);
+}
+.topnav a:hover,.topnav a.active{color:var(--green)}
+.topnav a:hover::before,.topnav a.active::before{
+  transform:scaleX(1);
+  transform-origin:left;
+}
+
+.sys{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--tiny);
+  font-size:.58rem;
+  letter-spacing:.08em;
+  color:var(--dim);
+  padding-left:16px;
+  border-left:1px solid var(--line);
+  flex:none;
+}
+.led{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:ledPulse 2.4s ease-in-out infinite;
+}
+@keyframes ledPulse{
+  50%{opacity:.35;box-shadow:0 0 3px var(--green)}
+}
+.clock{min-width:54px}
+
+.burger{
+  display:none;
+  width:36px;height:32px;
+  border:1px solid var(--line-strong);
+  background:transparent;
+  flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  flex:none;
+}
+.burger i{
+  width:14px;height:1.5px;background:var(--ink);
+  transition:.3s var(--ease);
+}
+.topbar.open .burger i:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.topbar.open .burger i:nth-child(2){opacity:0}
+.topbar.open .burger i:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
+.sec{padding:clamp(56px,7vw,96px) 0;position:relative}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:12px 20px;
+  background:transparent;
+  border:1px solid var(--green);
+  color:var(--green);
+  font-family:var(--tiny);
+  font-size:.62rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  white-space:nowrap;
+  transform:translate(var(--tx,0px),var(--ty,0px));
+  transition:transform .35s var(--ease),color .3s,background .3s,box-shadow .3s;
+}
+.btn::before{
+  content:'>';
+  color:var(--green);
+  transition:transform .35s var(--ease);
+  display:inline-block;
+}
+.btn:hover{
+  background:var(--green);
+  color:var(--bg);
+  box-shadow:0 0 24px rgba(61,255,138,.5);
+}
+.btn:hover::before{color:var(--bg);transform:translateX(3px)}
+.btn-solid{
+  background:var(--green);
+  color:var(--bg);
+}
+.btn-solid::before{color:var(--bg)}
+.btn-solid:hover{
+  background:transparent;
+  color:var(--green);
+  box-shadow:0 0 24px rgba(61,255,138,.35);
+}
+.btn-solid:hover::before{color:var(--green)}
+.btn-ghost{
+  border-color:var(--line-strong);
+  color:var(--dim);
+}
+.btn-ghost::before{color:var(--dim)}
+.btn-ghost:hover{
+  border-color:var(--green);
+  background:var(--green);
+  color:var(--bg);
+}
+.btn-ghost:hover::before{color:var(--bg)}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero{
+  padding:clamp(96px,13vw,140px) 0 clamp(48px,6vw,72px);
+  position:relative;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  gap:clamp(28px,4.4vw,56px);
+  align-items:start;
+}
+
+.kicker{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--tiny);
+  font-size:.6rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--dim);
+  padding:6px 10px;
+  border:1px solid var(--line);
+  margin-bottom:24px;
+}
+.kicker i{
+  width:6px;height:6px;background:var(--green);border-radius:50%;
+  display:block;
+  animation:ledPulse 1.8s ease-in-out infinite;
+}
+
+.h-title{
+  font-family:var(--pixel);
+  font-size:clamp(3.4rem,12.5vw,10rem);
+  line-height:.82;
+  letter-spacing:.01em;
+  font-weight:400;
+  margin-bottom:18px;
+  text-shadow:
+    0 0 22px rgba(61,255,138,.35),
+    0 0 60px rgba(61,255,138,.15);
+}
+.h-title .accent{color:var(--green)}
+.h-title .cursor-after{
+  display:inline-block;
+  color:var(--green);
+  animation:cursorBlink 1.06s step-end infinite;
+  margin-left:6px;
+  text-shadow:0 0 12px var(--green);
+}
+
+.hero-sub{
+  color:var(--dim);
+  font-size:clamp(.92rem,1.1vw,1rem);
+  line-height:1.75;
+  max-width:44ch;
+  margin-bottom:30px;
+}
+.hero-sub b{color:var(--ink);font-weight:500}
+
+.hero-actions{
+  display:flex;flex-wrap:wrap;gap:10px;
+  margin-bottom:30px;
+}
+
+.hero-stats{
+  display:flex;flex-wrap:wrap;gap:0;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+.hero-stats div{
+  padding-right:20px;margin-right:20px;
+  border-right:1px solid var(--line);
+  font-family:var(--tiny);
+  font-size:.58rem;
+  letter-spacing:.08em;
+  color:var(--dim);
+  text-transform:uppercase;
+}
+.hero-stats div:last-child{border-right:0;margin-right:0;padding-right:0}
+.hero-stats b{
+  display:block;
+  font-family:var(--pixel);
+  font-size:1.5rem;
+  line-height:1;
+  color:var(--green);
+  margin-bottom:4px;
+  font-weight:400;
+  letter-spacing:.02em;
+}
+
+/* ============================================================
+   TERMINAL
+============================================================ */
+.terminal{
+  background:var(--panel);
+  border:1px solid var(--line-strong);
+  box-shadow:
+    0 0 60px rgba(61,255,138,.08),
+    inset 0 0 60px rgba(0,0,0,.4);
+  overflow:hidden;
+  position:relative;
+}
+.term-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--line);
+  background:rgba(0,0,0,.35);
+  font-family:var(--mono);
+  font-size:.7rem;
+  color:var(--dim);
+}
+.term-tag{
+  margin-left:auto;
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.1em;
+  color:var(--green);
+  padding:3px 7px;
+  border:1px solid var(--line-strong);
+}
+.term-body{
+  padding:18px 20px;
+  min-height:180px;
+  max-height:340px;
+  overflow-y:auto;
+  font-size:.82rem;
+  line-height:1.75;
+  background:rgba(0,0,0,.2);
+}
+.term-body::-webkit-scrollbar{width:6px}
+.term-body::-webkit-scrollbar-thumb{background:var(--line-strong)}
+.term-line{white-space:pre-wrap;word-break:break-word}
+.term-line.dim{color:var(--dim)}
+.term-line.cmd{color:var(--green)}
+.term-line.warn{color:var(--magenta)}
+.ok{color:var(--green)}
+
+.boot-line{
+  opacity:0;
+  animation:bootIn .35s var(--ease) forwards;
+  animation-delay:calc(var(--i) * .22s + .3s);
+}
+@keyframes bootIn{
+  from{opacity:0;transform:translateX(-6px)}
+  to{opacity:1;transform:translateX(0)}
+}
+.prompt-line{
+  margin-top:10px;
+  color:var(--green);
+}
+.blink{animation:cursorBlink 1.06s step-end infinite}
+
+.term-input-wrap{
+  display:flex;align-items:center;gap:8px;
+  padding:14px 20px;
+  border-top:1px solid var(--line);
+  background:rgba(0,0,0,.35);
+  font-size:.82rem;
+}
+.prompt{
+  color:var(--green);
+  white-space:nowrap;
+  font-family:var(--mono);
+  font-size:.8rem;
+}
+#cmd{
+  flex:1;min-width:0;
+  background:transparent;
+  border:0;outline:none;
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:.82rem;
+  caret-color:var(--green);
+}
+
+/* ============================================================
+   SECTION HEAD
+============================================================ */
+.sec-head{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:24px;flex-wrap:wrap;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:clamp(28px,4vw,40px);
+}
+.sec-label{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.sec-num{
+  font-family:var(--tiny);
+  font-size:.66rem;
+  color:var(--green);
+  letter-spacing:.1em;
+}
+.sec-head h2{
+  font-family:var(--pixel);
+  font-size:clamp(2rem,5vw,3.6rem);
+  line-height:.95;
+  letter-spacing:.02em;
+  font-weight:400;
+  text-shadow:0 0 20px rgba(61,255,138,.25);
+}
+.sec-note{
+  font-family:var(--tiny);
+  font-size:.58rem;
+  letter-spacing:.08em;
+  color:var(--dim);
+  text-transform:uppercase;
+  max-width:34ch;
+}
+
+/* ============================================================
+   REVEAL
+============================================================ */
+.js .reveal{
+  opacity:0;transform:translateY(22px);
+  transition:opacity .9s var(--ease),transform .9s var(--ease);
+  transition-delay:var(--d,0s);
+}
+.js .reveal.in{opacity:1;transform:none}
+
+/* ============================================================
+   GAMES
+============================================================ */
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+}
+.game{
+  background:var(--panel);
+  border:1px solid var(--line);
+  position:relative;
+  overflow:hidden;
+  transition:border-color .35s,transform .4s var(--ease),box-shadow .4s;
+}
+.game:hover{
+  border-color:var(--green);
+  transform:translateY(-4px);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.5),
+    0 0 40px rgba(61,255,138,.1);
+}
+.game-art{
+  position:relative;
+  aspect-ratio:4/3;
+  overflow:hidden;
+  background:var(--panel-2);
+  border-bottom:1px solid var(--line);
+}
+.game-art::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:16px 16px;
+  opacity:.5;
+  z-index:1;
+}
+.game-art::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, transparent 42%, rgba(61,255,138,.28) 50%, transparent 58%);
+  transform:translateY(-100%);
+  pointer-events:none;
+  z-index:3;
+}
+.game:hover .game-art::after{animation:artScan 1.2s linear}
+@keyframes artScan{
+  from{transform:translateY(-100%)}
+  to{transform:translateY(100%)}
+}
+.game-orb{
+  position:absolute;
+  left:50%;top:50%;
+  width:55%;aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--c1), var(--c2) 55%, transparent 100%);
+  filter:blur(1.5px);
+  opacity:.92;
+  z-index:2;
+  transition:transform .65s var(--ease);
+}
+.game:hover .game-orb{transform:translate(-50%,-50%) scale(1.14)}
+.game-id{
+  position:absolute;
+  top:11px;left:12px;
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.1em;
+  color:var(--dim);
+  z-index:4;
+  padding:4px 7px;
+  background:rgba(7,8,10,.78);
+  border:1px solid var(--line);
+}
+.game-info{padding:18px 20px 20px}
+.game-head{
+  display:flex;justify-content:space-between;align-items:baseline;
+  gap:12px;margin-bottom:6px;
+}
+.game-head h3{
+  font-family:var(--pixel);
+  font-size:1.65rem;
+  line-height:1;
+  letter-spacing:.02em;
+  font-weight:400;
+  transition:color .3s;
+}
+.game:hover .game-head h3{color:var(--green)}
+.game-year{
+  font-family:var(--tiny);
+  font-size:.56rem;
+  color:var(--dim);
+}
+.game-meta{
+  font-family:var(--tiny);
+  font-size:.56rem;
+  color:var(--green);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.game-desc{
+  color:var(--dim);
+  font-size:.8rem;
+  line-height:1.65;
+  margin-bottom:16px;
+}
+.game-links{
+  display:flex;gap:16px;
+  font-family:var(--tiny);
+  font-size:.56rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.game-links a{
+  color:var(--green);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s;
+}
+.game-links a:hover{border-bottom-color:var(--green)}
+
+/* ============================================================
+   CREW
+============================================================ */
+.crew-list{border-top:1px solid var(--line)}
+.crew-row{
+  display:grid;
+  grid-template-columns:200px 1fr auto auto;
+  gap:24px;
+  align-items:center;
+  padding:18px 0;
+  border-bottom:1px solid var(--line);
+  transition:background .3s,padding .35s var(--ease);
+}
+.crew-row:hover{
+  background:rgba(61,255,138,.03);
+  padding-left:14px;padding-right:14px;
+}
+.crew-name{
+  font-family:var(--tiny);
+  font-size:.7rem;
+  letter-spacing:.06em;
+  color:var(--ink);
+}
+.crew-role{
+  color:var(--dim);
+  font-size:.82rem;
+}
+.crew-since{
+  font-family:var(--tiny);
+  font-size:.56rem;
+  color:var(--dim);
+  letter-spacing:.06em;
+}
+.crew-row.open .crew-name,
+.crew-row.open .crew-role{color:var(--green)}
+.crew-arrow{
+  font-family:var(--tiny);
+  font-size:.6rem;
+  color:var(--dim);
+  transition:transform .35s var(--ease),color .3s;
+}
+.crew-row:hover .crew-arrow{
+  color:var(--green);
+  transform:translateX(4px);
+}
+
+/* ============================================================
+   DEVLOG
+============================================================ */
+.log-list{border-top:1px solid var(--line)}
+.log-row{
+  display:grid;
+  grid-template-columns:100px 1fr auto;
+  gap:20px;
+  align-items:baseline;
+  padding:16px 0;
+  border-bottom:1px solid var(--line);
+  transition:background .3s,padding .35s var(--ease);
+}
+.log-row:hover{
+  background:rgba(61,255,138,.03);
+  padding-left:14px;padding-right:14px;
+}
+.log-date{
+  font-family:var(--tiny);
+  font-size:.58rem;
+  color:var(--dim);
+  letter-spacing:.06em;
+}
+.log-title{
+  color:var(--ink);
+  font-size:.88rem;
+  transition:color .3s;
+}
+.log-row:hover .log-title{color:var(--green)}
+.log-tag{
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--green);
+  padding:3px 7px;
+  border:1px solid var(--line-strong);
+  white-space:nowrap;
+}
+
+/* ============================================================
+   CONTACT
+============================================================ */
+.contact-shell{
+  background:var(--panel);
+  border:1px solid var(--line-strong);
+  box-shadow:
+    0 0 60px rgba(61,255,138,.08),
+    inset 0 0 60px rgba(0,0,0,.4);
+  overflow:hidden;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer{
+  border-top:1px solid var(--line);
+  padding:clamp(32px,4vw,52px) 0 26px;
+  margin-top:clamp(32px,4vw,56px);
+}
+.foot-top{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:32px;flex-wrap:wrap;
+  padding-bottom:clamp(28px,4vw,40px);
+  border-bottom:1px solid var(--line);
+}
+.foot-brand{
+  font-family:var(--pixel);
+  font-size:1.6rem;
+  letter-spacing:.02em;
+  line-height:1;
+  color:var(--green);
+  text-shadow:0 0 16px rgba(61,255,138,.4);
+}
+.foot-brand small{
+  display:block;
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.1em;
+  color:var(--dim);
+  margin-top:8px;
+  text-shadow:none;
+}
+.foot-links{display:flex;gap:clamp(24px,4vw,56px);flex-wrap:wrap}
+.foot-col h5{
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--dim);
+  margin-bottom:12px;
+  font-weight:400;
+}
+.foot-col a{
+  display:block;
+  font-family:var(--mono);
+  font-size:.8rem;
+  color:var(--ink);
+  margin-bottom:8px;
+  transition:color .3s,transform .3s;
+}
+.foot-col a:hover{color:var(--green);transform:translateX(3px)}
+
+.foot-bottom{
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding-top:20px;
+  font-family:var(--tiny);
+  font-size:.54rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--dim);
+}
+
+/* ============================================================
+   TOAST
+============================================================ */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:9996;
+  transform:translate(-50%,160%);
+  display:flex;align-items:center;gap:10px;
+  padding:12px 20px;
+  background:var(--bg);
+  border:1px solid var(--green);
+  color:var(--green);
+  font-family:var(--tiny);
+  font-size:.6rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  box-shadow:0 0 30px rgba(61,255,138,.35);
+  white-space:nowrap;
+  transition:transform .55s var(--ease);
+}
+.toast.show{transform:translate(-50%,0)}
+.toast i{
+  width:6px;height:6px;background:var(--green);border-radius:50%;flex:none;
+  box-shadow:0 0 8px var(--green);
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .games-grid{grid-template-columns:repeat(2,1fr)}
+  .crew-row{grid-template-columns:170px 1fr auto}
+  .crew-since{display:none}
+}
+@media (max-width:880px){
+  .topnav{
+    position:absolute;
+    top:100%;left:0;right:0;
+    flex-direction:column;
+    gap:0;
+    padding:6px clamp(16px,3vw,28px) 16px;
+    background:rgba(7,8,10,.96);
+    border-bottom:1px solid var(--line-strong);
+    opacity:0;visibility:hidden;
+    transform:translateY(-8px);
+    transition:opacity .35s var(--ease),transform .35s var(--ease),visibility .35s;
+    margin-left:0;
+  }
+  .topnav a{
+    padding:13px 0;
+    font-size:.66rem;
+    border-bottom:1px solid var(--line);
+  }
+  .topnav a::before{display:none}
+  .topbar.open .topnav{opacity:1;visibility:visible;transform:none}
+  .burger{display:flex}
+  .sys{padding-left:12px}
+  .topbar .path{display:none}
+}
+@media (max-width:720px){
+  .games-grid{grid-template-columns:1fr}
+  .crew-row{
+    grid-template-columns:1fr auto;
+    gap:6px 16px;
+    padding:16px 0;
+  }
+  .crew-name{grid-column:1}
+  .crew-role{grid-column:1;font-size:.78rem}
+  .crew-arrow{grid-column:2;grid-row:1/3;align-self:center}
+  .log-row{grid-template-columns:1fr auto;gap:6px 16px;padding:14px 0}
+  .log-date{grid-column:1;grid-row:1}
+  .log-tag{grid-column:2;grid-row:1}
+  .log-title{grid-column:1/-1;grid-row:2}
+}
+@media (max-width:620px){
+  .h-title{font-size:clamp(3rem,17vw,4.4rem)}
+  .hero-stats div{
+    padding-right:14px;margin-right:14px;
+    font-size:.52rem;
+  }
+  .hero-stats b{font-size:1.3rem}
+  .foot-top{flex-direction:column;gap:28px}
+  .hero{padding-top:100px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+  .boot-line{opacity:1;transform:none}
+  .scanbeam{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- CRT overlays -->
+<div class="scanlines" aria-hidden="true"></div>
+<div class="scanbeam" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor" aria-hidden="true">
+  <div class="cursor-block"></div>
+  <div class="cursor-ring"></div>
+</div>
+<div id="trail" aria-hidden="true"></div>
+
+<!-- Progress -->
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- TOPBAR -->
+<header class="topbar" id="topbar">
+  <div class="win-dots" aria-hidden="true">
+    <span class="d r"></span><span class="d a"></span><span class="d g"></span>
+  </div>
+  <span class="path">~/deadchannel</span>
+
+  <nav class="topnav" id="topnav" aria-label="Main">
+    <a href="#games">games</a>
+    <a href="#crew">crew</a>
+    <a href="#devlog">devlog</a>
+    <a href="#contact">contact</a>
+  </nav>
+
+  <div class="sys" aria-hidden="true">
+    <span class="led"></span>
+    <span class="clock" id="clock">00:00:00</span>
+  </div>
+
+  <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">
+    <i></i><i></i><i></i>
+  </button>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="wrap">
+      <div class="hero-grid">
+
+        <div>
+          <span class="kicker reveal"><i></i> Independent game studio · Berlin · est. 2017</span>
+
+          <h1 class="h-title reveal" style="--d:.06s">
+            DEAD<span class="accent">CHANNEL</span><span class="cursor-after">█</span>
+          </h1>
+
+          <p class="hero-sub reveal" style="--d:.14s">
+            We make <b>small games about big feelings</b>. Three titles, four humans,
+            one very loud server. Currently beaming from a basement in Kreuzberg.
+          </p>
+
+          <div class="hero-actions reveal" style="--d:.2s">
+            <a href="#games" class="btn btn-solid magnetic">Load games</a>
+            <a href="#contact" class="btn magnetic">Open channel</a>
+          </div>
+
+          <div class="hero-stats reveal" style="--d:.28s">
+            <div><b>03</b> games shipped</div>
+            <div><b>04</b> humans</div>
+            <div><b>2.4M</b> players</div>
+            <div><b>∞</b> ideas</div>
+          </div>
+        </div>
+
+        <div class="terminal reveal" style="--d:.16s" aria-label="Boot log">
+          <div class="term-bar">
+            <div class="win-dots" aria-hidden="true">
+              <span class="d r"></span><span class="d a"></span><span class="d g"></span>
+            </div>
+            <span>boot.log</span>
+            <span class="term-tag">BOOT</span>
+          </div>
+          <div class="term-body">
+            <div class="boot-line" style="--i:0"><span class="ok">[ ok ]</span> boot deadchannel.os v4.2.1</div>
+            <div class="boot-line" style="--i:1"><span class="ok">[ ok ]</span> load modules</div>
+            <div class="boot-line" style="--i:2"><span class="ok">[ ok ]</span> mount /archive</div>
+            <div class="boot-line" style="--i:3"><span class="ok">[ ok ]</span> init sprite engine</div>
+            <div class="boot-line" style="--i:4"><span class="ok">[ ok ]</span> open audio bus</div>
+            <div class="boot-line" style="--i:5"><span class="ok">[ ok ]</span> connect net channel</div>
+            <div class="boot-line" style="--i:6"><span class="ok">[ ok ]</span> ready — 3 games, 4 humans</div>
+            <div class="boot-line prompt-line" style="--i:7">deadchannel@studio:~$ <span class="blink">█</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES -->
+  <section class="sec" id="games">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-label">
+          <span class="sec-num">[ 02 ]</span>
+          <h2>GAMES</h2>
+        </div>
+        <p class="sec-note">3 titles · 2022 — 2025<br>PC · Switch · itch.io</p>
+      </div>
+
+      <div class="games-grid">
+
+        <article class="game reveal" style="--d:.04s">
+          <div class="game-art" style="--c1:#3de1ff;--c2:#3dff8a">
+            <span class="game-id">DC-001</span>
+            <div class="game-orb"></div>
+          </div>
+          <div class="game-info">
+            <div class="game-head">
+              <h3>VOID RUNNER</h3>
+              <span class="game-year">2024</span>
+            </div>
+            <p class="game-meta">Roguelite · PC / Switch</p>
+            <p class="game-desc">Run, die, repeat. A courier who can't quite stop dying and a city that keeps rearranging itself behind her.</p>
+            <div class="game-links">
+              <a href="#">▶ play demo</a>
+              <a href="#">↗ wishlist</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game reveal" style="--d:.12s">
+          <div class="game-art" style="--c1:#ff3d9a;--c2:#ffb700">
+            <span class="game-id">DC-002</span>
+            <div class="game-orb"></div>
+          </div>
+          <div class="game-info">
+            <div class="game-head">
+              <h3>SIGNAL LOST</h3>
+              <span class="game-year">2023</span>
+            </div>
+            <p class="game-meta">Narrative horror · PC</p>
+            <p class="game-desc">A radio operator alone in the arctic hears something answer back. A slow-burn story told entirely through sound.</p>
+            <div class="game-links">
+              <a href="#">▶ play</a>
+              <a href="#">↗ ost</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="game reveal" style="--d:.2s">
+          <div class="game-art" style="--c1:#3dff8a;--c2:#3de1ff">
+            <span class="game-id">DC-003</span>
+            <div class="game-orb"></div>
+          </div>
+          <div class="game-info">
+            <div class="game-head">
+              <h3>PHOSPHOR</h3>
+              <span class="game-year">2022</span>
+            </div>
+            <p class="game-meta">Puzzle · PC / itch.io</p>
+            <p class="game-desc">Light is the only mechanic. Guide glow through rusting machines in a world that only exists while you're looking.</p>
+            <div class="game-links">
+              <a href="#">▶ play</a>
+              <a href="#">↗ patch notes</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CREW -->
+  <section class="sec" id="crew">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-label">
+          <span class="sec-num">[ 03 ]</span>
+          <h2>CREW</h2>
+        </div>
+        <p class="sec-note">Four humans<br>One open channel</p>
+      </div>
+
+      <div class="crew-list reveal" style="--d:.08s">
+        <div class="crew-row">
+          <span class="crew-name">MIRA HALE</span>
+          <span class="crew-role">Creative director</span>
+          <span class="crew-since">since 2017</span>
+          <span class="crew-arrow">→</span>
+        </div>
+        <div class="crew-row">
+          <span class="crew-name">YUTO SATO</span>
+          <span class="crew-role">Engine &amp; tools</span>
+          <span class="crew-since">since 2018</span>
+          <span class="crew-arrow">→</span>
+        </div>
+        <div class="crew-row">
+          <span class="crew-name">NINA KRUG</span>
+          <span class="crew-role">Art &amp; animation</span>
+          <span class="crew-since">since 2019</span>
+          <span class="crew-arrow">→</span>
+        </div>
+        <div class="crew-row">
+          <span class="crew-name">OSCAR BEL</span>
+          <span class="crew-role">Sound design</span>
+          <span class="crew-since">since 2020</span>
+          <span class="crew-arrow">→</span>
+        </div>
+        <div class="crew-row open">
+          <span class="crew-name">[ OPEN ]</span>
+          <span class="crew-role">Senior engineer — apply below</span>
+          <span class="crew-since">hiring</span>
+          <span class="crew-arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEVLOG -->
+  <section class="sec" id="devlog">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-label">
+          <span class="sec-num">[ 04 ]</span>
+          <h2>DEVLOG</h2>
+        </div>
+        <p class="sec-note">Notes from the basement<br>Updated most Fridays</p>
+      </div>
+
+      <div class="log-list reveal" style="--d:.08s">
+        <div class="log-row">
+          <span class="log-date">2025.11.08</span>
+          <span class="log-title">Void Runner — new biome unlocked</span>
+          <span class="log-tag">build</span>
+        </div>
+        <div class="log-row">
+          <span class="log-date">2025.10.27</span>
+          <span class="log-title">Signal Lost OST is now on Bandcamp</span>
+          <span class="log-tag">release</span>
+        </div>
+        <div class="log-row">
+          <span class="log-date">2025.10.11</span>
+          <span class="log-title">We are hiring a senior engineer + pixel artist</span>
+          <span class="log-tag">studio</span>
+        </div>
+        <div class="log-row">
+          <span class="log-date">2025.09.30</span>
+          <span class="log-title">Phosphor 1.3 patch notes</span>
+          <span class="log-tag">patch</span>
+        </div>
+        <div class="log-row">
+          <span class="log-date">2025.09.14</span>
+          <span class="log-title">How we design in monochrome — an essay</span>
+          <span class="log-tag">essay</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="sec" id="contact">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <div class="sec-label">
+          <span class="sec-num">[ 05 ]</span>
+          <h2>OPEN A CHANNEL</h2>
+        </div>
+        <p class="sec-note">Interactive shell<br>try: help · ls · playtest · hire</p>
+      </div>
+
+      <div class="contact-shell terminal reveal" style="--d:.08s">
+        <div class="term-bar">
+          <div class="win-dots" aria-hidden="true">
+            <span class="d r"></span><span class="d a"></span><span class="d g"></span>
+          </div>
+          <span>deadchannel — /bin/sh</span>
+          <span class="term-tag">SHELL</span>
+        </div>
+
+        <div class="term-body" id="termBody">
+          <div class="term-line dim">deadchannel.os v4.2.1 — interactive shell</div>
+          <div class="term-line dim">type 'help' for available commands</div>
+          <div class="term-line dim">────────────────────────────────────</div>
+          <div class="term-line">&nbsp;</div>
+        </div>
+
+        <div class="term-input-wrap">
+          <span class="prompt">deadchannel@studio:~$</span>
+          <input id="cmd" type="text" autocomplete="off" spellcheck="false"
+                 aria-label="Terminal command input" placeholder="type 'help' and hit enter">
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand">
+          DEAD<span style="color:var(--ink)">CHANNEL</span>
+          <small>independent game studio · berlin · est. 2017</small>
+        </div>
+      </div>
+
+      <div class="foot-links">
+        <div class="foot-col">
+          <h5>studio</h5>
+          <a href="#games">games</a>
+          <a href="#crew">crew</a>
+          <a href="#devlog">devlog</a>
+          <a href="#contact">contact</a>
+        </div>
+        <div class="foot-col">
+          <h5>play</h5>
+          <a href="#">itch.io</a>
+          <a href="#">steam</a>
+          <a href="#">bandcamp</a>
+        </div>
+        <div class="foot-col">
+          <h5>elsewhere</h5>
+          <a href="#">twitter / x</a>
+          <a href="#">bluesky</a>
+          <a href="#">discord</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2026 deadchannel — all rights reserved</span>
+      <span>demo site · design &amp; code</span>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <i></i> <span id="toastText">command received</span>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  /* ============================================================
+     TOPBAR SCROLL STATE + PROGRESS
+  ============================================================ */
+  const topbar = document.getElementById('topbar');
+  const progress = document.getElementById('progress');
+
+  function onScroll() {
+    const el = document.documentElement;
+    const max = el.scrollHeight - el.clientHeight;
+    progress.style.width = (max > 0 ? (el.scrollTop / max) * 100 : 0) + '%';
+    topbar.classList.toggle('scrolled', el.scrollTop > 30);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ============================================================
+     CLOCK
+  ============================================================ */
+  const clock = document.getElementById('clock');
+  function tickClock() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    clock.textContent = p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ============================================================
+     MOBILE NAV
+  ============================================================ */
+  const burger = document.getElementById('burger');
+  burger.addEventListener('click', () => {
+    const open = topbar.classList.toggle('open');
+    burger.setAttribute('aria-expanded', String(open));
+  });
+  document.querySelectorAll('.topnav a').forEach((a) =>
+    a.addEventListener('click', () => {
+      topbar.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    })
+  );
+
+  /* ============================================================
+     REVEAL ON SCROLL
+  ============================================================ */
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
+    revealEls.forEach((el) => io.observe(el));
+  } else {
+    revealEls.forEach((el) => el.classList.add('in'));
+  }
+
+  /* ============================================================
+     ACTIVE NAV
+  ============================================================ */
+  const sections = [...document.querySelectorAll('section[id]')];
+  const anchors = [...document.querySelectorAll('.topnav a')];
+  if ('IntersectionObserver' in window) {
+    const spy = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          anchors.forEach((a) =>
+            a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id)
+          );
+        }
+      });
+    }, { threshold: 0.2, rootMargin: '-18% 0px -60% 0px' });
+    sections.forEach((s) => spy.observe(s));
+  }
+
+  /* ============================================================
+     BLOCK CURSOR + PHOSPHOR TRAIL
+  ============================================================ */
+  const cursor = document.getElementById('cursor');
+  const trailWrap = document.getElementById('trail');
+
+  if (fine) {
+    document.body.classList.add('has-cursor');
+
+    const TRAIL_COUNT = 4;
+    const trail = [];
+    for (let i = 0; i < TRAIL_COUNT; i++) {
+      const d = document.createElement('div');
+      d.className = 'trail-dot';
+      d.style.opacity = String(Math.max(0.08, 0.34 - i * 0.07));
+      trailWrap.appendChild(d);
+      trail.push({
+        el: d,
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+      });
+    }
+
+    let mx = window.innerWidth / 2;
+    let my = window.innerHeight / 2;
+    let cx = mx;
+    let cy = my;
+
+    window.addEventListener('mousemove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+    }, { passive: true });
+
+    (function loop() {
+      cx += (mx - cx) * 0.42;
+      cy += (my - cy) * 0.42;
+      cursor.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)';
+
+      let px = cx;
+      let py = cy;
+      trail.forEach((t) => {
+        t.x += (px - t.x) * 0.32;
+        t.y += (py - t.y) * 0.32;
+        t.el.style.transform =
+          'translate3d(' + t.x + 'px,' + t.y + 'px,0) translate(-50%,-50%)';
+        px = t.x;
+        py = t.y;
+      });
+
+      requestAnimationFrame(loop);
+    })();
+
+    const hoverables = document.querySelectorAll(
+      'a, button, input, .game, .crew-row, .log-row'
+    );
+    hoverables.forEach((el) => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('hot'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('hot'));
+    });
+  }
+
+  /* ============================================================
+     MAGNETIC BUTTONS
+  ============================================================ */
+  if (fine && !reduce) {
+    document.querySelectorAll('.magnetic').forEach((el) => {
+      el.addEventListener('mousemove', (e) => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width / 2) * 0.18;
+        const y = (e.clientY - r.top - r.height / 2) * 0.24;
+        el.style.setProperty('--tx', x.toFixed(2) + 'px');
+        el.style.setProperty('--ty', y.toFixed(2) + 'px');
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.setProperty('--tx', '0px');
+        el.style.setProperty('--ty', '0px');
+      });
+    });
+  }
+
+  /* ============================================================
+     INTERACTIVE SHELL
+  ============================================================ */
+  const termBody = document.getElementById('termBody');
+  const cmdInput = document.getElementById('cmd');
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+
+  function writeLine(text, cls) {
+    const d = document.createElement('div');
+    d.className = 'term-line' + (cls ? ' ' + cls : '');
+    d.textContent = text === '' ? '\u00a0' : text;
+    termBody.appendChild(d);
+    termBody.scrollTop = termBody.scrollHeight;
+  }
+
+  function writeHTML(html) {
+    const d = document.createElement('div');
+    d.className = 'term-line';
+    d.innerHTML = html;
+    termBody.appendChild(d);
+    termBody.scrollTop = termBody.scrollHeight;
+  }
+
+  function showToast(msg) {
+    toastText.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+
+  const files = {
+    'about.txt': [
+      'DEADCHANNEL is an independent game studio based in Berlin.',
+      'Founded 2017. Four humans, three games, one very loud server.',
+      'We make small games about big feelings.'
+    ],
+    'contact.txt': [
+      'email    hello@deadchannel.games',
+      'jobs     jobs@deadchannel.games',
+      'press    press@deadchannel.games',
+      'playtest playtest@deadchannel.games'
+    ],
+    'jobs.txt': [
+      'open roles:',
+      '  · senior engineer (full-time, berlin or remote)',
+      '  · pixel artist (contract, 3 months)',
+      'send portfolio + three favourite games to jobs@deadchannel.games'
+    ]
+  };
+
+  const commands = {
+    help() {
+      writeLine('available commands:');
+      writeLine('  help            show this list');
+      writeLine('  ls              list files');
+      writeLine('  whoami          identify yourself');
+      writeLine('  cat <file>      read a file (about.txt, contact.txt, jobs.txt)');
+      writeLine('  games           list our games');
+      writeLine('  crew            list the crew');
+      writeLine('  playtest        apply for playtesting');
+      writeLine('  hire            open positions');
+      writeLine('  date            system time');
+      writeLine('  clear           clear the screen');
+    },
+    ls() {
+      writeLine('about.txt   contact.txt   jobs.txt   games/   crew/   devlog/');
+    },
+    whoami() {
+      writeLine('you are a visitor. we are deadchannel. we make small games about big feelings.');
+    },
+    cat(arg) {
+      if (!arg) {
+        writeLine('usage: cat <file>', 'warn');
+        return;
+      }
+      const f = files[arg];
+      if (f) {
+        f.forEach((l) => writeLine(l));
+      } else {
+        writeLine('cat: ' + arg + ': no such file', 'warn');
+      }
+    },
+    games() {
+      writeLine('DC-001  VOID RUNNER      roguelite   2024');
+      writeLine('DC-002  SIGNAL LOST     narrative   2023');
+      writeLine('DC-003  PHOSPHOR        puzzle      2022');
+    },
+    crew() {
+      writeLine('mira hale     creative director');
+      writeLine('yuto sato     engine & tools');
+      writeLine('nina krug     art & animation');
+      writeLine('oscar bel     sound design');
+      writeLine('[open]        senior engineer');
+    },
+    playtest() {
+      writeLine('playtest applications are open until 30.11.');
+      writeLine('write to playtest@deadchannel.games with your setup + availability.');
+      showToast('playtest window open');
+    },
+    hire() {
+      writeLine('we are hiring.');
+      writeLine('open: senior engineer, pixel artist');
+      writeLine('send portfolio to jobs@deadchannel.games');
+      showToast('jobs transmitted');
+    },
+    date() {
+      writeLine(new Date().toString());
+    },
+    clear() {
+      termBody.innerHTML = '';
+      writeLine('deadchannel.os v4.2.1 — interactive shell', 'dim');
+      writeLine("type 'help' for available commands", 'dim');
+      writeLine('');
+    },
+    sudo() {
+      writeLine('nice try.', 'warn');
+    },
+    exit() {
+      writeLine('there is no exit.', 'warn');
+    }
+  };
+
+  function handle(raw) {
+    const input = raw.trim();
+    if (!input) return;
+
+    writeLine('deadchannel@studio:~$ ' + input, 'cmd');
+
+    const parts = input.split(/\s+/);
+    const c = parts[0].toLowerCase();
+    const arg = parts.slice(1).join(' ');
+
+    if (Object.prototype.hasOwnProperty.call(commands, c)) {
+      commands[c](arg);
+    } else {
+      writeLine(c + ': command not found. try "help".', 'warn');
+    }
+    writeLine('');
+  }
+
+  if (cmdInput) {
+    cmdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handle(cmdInput.value);
+        cmdInput.value = '';
+      }
+    });
+  }
+
+  /* ============================================================
+     SMOOTH ANCHORS
+  ============================================================ */
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const id = link.getAttribute('href');
+      if (!id || id.length < 2) return;
+      const target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      // focus terminal input if contact
+      if (id === '#contact' && cmdInput) {
+        setTimeout(() => cmdInput.focus({ preventScroll: true }), 700);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
